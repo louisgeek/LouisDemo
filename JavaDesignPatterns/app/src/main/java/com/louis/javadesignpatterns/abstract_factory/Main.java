@@ -9,7 +9,7 @@ import com.louis.javadesignpatterns.abstract_factory.factory.ProductFactory;
  * Created by louisgeek on 2024/10/28.
  */
 public class Main {
-    public void main(String[] args) {
+    public static void main(String[] args) {
         ProductFactory productFactory1 = new ProductFactory1();
         IProductA productA1 = productFactory1.createProductA();
         IProductB productB1 = productFactory1.createProductB();
