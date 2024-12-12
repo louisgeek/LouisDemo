@@ -1,7 +1,9 @@
 package com.louis.javadesignpatterns.pipeline.function;
 
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by louisgeek on 2024/12/12.
@@ -13,6 +15,8 @@ public class Main {
         test2();
         test3();
         test4();
+        //
+        test();
     }
 
     //采用函数式接口
@@ -57,5 +61,33 @@ public class Main {
         Integer outputLen = pipeline.apply(input);
         System.out.println("InputLen: '" + input.length() + "'");
         System.out.println("OutputLen: '" + outputLen + "'");
+    }
+
+
+    public static void test() {
+        //1准备数据
+        List<Integer> numbers = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        //2定义数据处理步骤
+
+        // 偶数
+        Function<List<Integer>, List<Integer>> filterEven = list -> list.stream()
+                .filter(n -> n % 2 == 0)
+                .collect(Collectors.toList());
+        // 除法
+        Function<List<Integer>, List<Integer>> divisionByTwo = list -> list.stream()
+                .map(n -> n / 2)
+                .collect(Collectors.toList());
+        // 求和
+        Function<List<Integer>, Integer> sum = list -> list.stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+        //3构建管道
+        Function<List<Integer>, Integer> pipeline = filterEven
+                .andThen(filterEven)
+                .andThen(divisionByTwo)
+                .andThen(sum);
+        //4执行管道
+        int result = pipeline.apply(numbers);
+        System.out.println("Result: " + result); //  Result: 15
     }
 }
