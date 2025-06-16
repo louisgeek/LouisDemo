@@ -6,4 +6,11 @@
     </style>
 
     <style name="Theme.MyView" parent="Base.Theme.MyView" />
+
+    <style name="myRatingBarStyte" parent="@android:style/Widget.RatingBar">
+        <item name="android:progressDrawable">@drawable/layer_list_ratingbar</item>
+        <item name="android:minHeight">32dp</item>
+        <item name="android:maxHeight">32dp</item>
+    </style>
+
 </resources>
