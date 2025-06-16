@@ -28,12 +28,14 @@ public class UDPClient {
             String log = String.format(Locale.CHINA, "1 客户端 %s:%d 发送消息到服务端 %s:%d 成功",
                     clientInetAddress.getHostAddress(), clientPort, serverInetAddress.getHostAddress(), serverPort);
             System.out.println(log);
+
             //发送消息后等待回复消息
             byte[] bytes = new byte[1024];
             DatagramPacket receiveDatagramPacket = new DatagramPacket(bytes, bytes.length);
             log = String.format(Locale.CHINA, "2 客户端 %s:%d 发送消息后等待服务端 %s:%d 回复",
                     clientInetAddress.getHostAddress(), clientPort, serverInetAddress.getHostAddress(), serverPort);
             System.out.println(log);
+
             datagramSocket.receive(receiveDatagramPacket);
             byte[] receiveData = receiveDatagramPacket.getData();
             String receiveIp = receiveDatagramPacket.getAddress().getHostAddress();
@@ -42,6 +44,7 @@ public class UDPClient {
             log = String.format(Locale.CHINA, "3 客户端 %s:%d 接收到服务端消息消息 %s:%d 内容：%s",
                     clientInetAddress.getHostAddress(), clientPort, receiveIp, receivePort, receive);
             System.out.println(log);
+
             //释放资源
             datagramSocket.close();
         } catch (Exception e) {
