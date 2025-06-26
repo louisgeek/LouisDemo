@@ -7,7 +7,7 @@ import android.webkit.WebView
 /**
  * 比如让 WebView 透明
  */
-fun WebView.setBackgroundColorCompat(color: Int) {
+fun WebView.setBackgroundColorFixed(color: Int) {
     //this.setBackgroundResource(android.R.color.transparent); //无效
     //this.setBackground(new ColorDrawable(Color.TRANSPARENT)); //无效
     this.setBackgroundColor(color) //重要

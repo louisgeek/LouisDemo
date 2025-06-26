@@ -44,7 +44,7 @@ class WebViewDialogFragment : DialogFragment() {
         progressBar = view.findViewById(R.id.progressBar)
         //vProgressBar.setVisibility(View.VISIBLE);
 
-        webView?.setBackgroundColorCompat(Color.TRANSPARENT)
+        webView?.setBackgroundColorFixed(Color.TRANSPARENT)
 
         val width = (ScreenTool.screenWidth * 0.9f).toInt()
         val height = (ScreenTool.screenHeight * 0.9f).toInt()
