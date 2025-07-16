@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MyJNI"
+rootProject.name = "MyJni"
 include ':app'
