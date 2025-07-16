@@ -1,26 +1,48 @@
 package com.louis.mymedia3exo
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 
 
 class PlayerFragment : Fragment() {
-    // TODO: Rename and change types of parameters
+
+    companion object {
+        private const val TAG = "PlayerFragment"
+        private const val SP_NAME = "PlaybackSP"
+
+
+        private const val ARG_PARAM1 = "param1"
+        private const val ARG_PARAM2 = "param2"
+
+        @JvmStatic
+        fun newInstance(param1: String, param2: String) =
+            PlayerFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_PARAM1, param1)
+                    putString(ARG_PARAM2, param2)
+                }
+            }
+    }
+
     private var param1: String? = null
     private var param2: String? = null
 
@@ -36,77 +58,73 @@ class PlayerFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
+
         return inflater.inflate(R.layout.fragment_player, container, false)
     }
 
-    companion object {
-        private const val TAG = "PlayerFragment"
-        private const val SP_NAME = "PlaybackSP"
-
-        // TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-        private const val ARG_PARAM1 = "param1"
-        private const val ARG_PARAM2 = "param2"
-
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment PlayerFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            PlayerFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
 
     private lateinit var playerView: PlayerView
+    private lateinit var fullscreen: View
 
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         playerView = view.findViewById(R.id.playerView)
+        fullscreen = view.findViewById(R.id.fullscreen)
+
+        fullscreen.setOnClickListener {
+            //自定义全屏按钮
+            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                //ORIENTATION_PORTRAIT 纵向 -> 横向
+                setFullScreen(true)
+            } else if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                //ORIENTATION_LANDSCAPE 横向 -> 纵向
+                setFullScreen(false)
+            }
+        }
+        //初始化
+        this.initializePlayer()
     }
 
     override fun onStart() {
         super.onStart()
-        initializePlayer() //API > 23 在 onStart
+//        this.startPlayer()
+        this.resumePlayer()
     }
 
     override fun onStop() {
         super.onStop()
-        //
-        releasePlayer() //API > 23 在 onStop
+//        this.stopPlayer()
+        this.pausePlayer()
     }
 
-    override fun onPause() {
-        super.onPause()
-//        pausePlayer()
-    }
-
-    override fun onResume() {
-        super.onResume()
-//        resumePlayer()
+    override fun onDestroy() {
+        super.onDestroy()
+        this.releasePlayer()
     }
 
     private var exoPlayer: ExoPlayer? = null
+    private var vidSize = Size(0, 0)
 
     @OptIn(UnstableApi::class)
     private fun initializePlayer() {
+        //API > 23 可以放在 onStart
         val context = requireContext()
 
         exoPlayer = ExoPlayer.Builder(context).build()
         // 与 PlayerView 关联
         playerView.player = exoPlayer
+        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT //保持比例，可能两侧留黑边
+        playerView.setAspectRatioListener { targetAspectRatio, naturalAspectRatio, aspectRatioMismatch ->
+//            val params = playerView.layoutParams as FrameLayout.LayoutParams
+//            params.height = (params.width / targetAspectRatio).toInt()
+//            playerView.layoutParams = params
+        }
+        playerView.setFullscreenButtonClickListener { isFullscreen ->
+            //播放器自带的全屏按钮
+            setFullScreen(isFullscreen)
+        }
 
         exoPlayer?.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -116,16 +134,31 @@ class PlayerFragment : Fragment() {
                     val savedCurrentPosition = sharedPreferences.getLong("currentPosition", 0)
                     val savedPlayWhenReady = sharedPreferences.getBoolean("playWhenReady", true)
                     //恢复进度
-                    if (savedCurrentPosition > 0) {
-                        exoPlayer?.seekTo(savedCurrentPosition)
-                    }
-                    exoPlayer?.playWhenReady = savedPlayWhenReady
+//                    if (savedCurrentPosition > 0) {
+//                        exoPlayer?.seekTo(savedCurrentPosition)
+//                    }
+//                    exoPlayer?.playWhenReady = savedPlayWhenReady
                     //恢复后移除
                     exoPlayer?.removeListener(this)
                     Log.e(TAG, "恢复进度: $savedCurrentPosition $savedPlayWhenReady")
                 }
             }
+
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                //拿到视频的宽高，将播放界面的宽高比例更改为视频自身的宽高比
+                vidSize = Size(videoSize.width, videoSize.height)
+                val screenWidth = resources.displayMetrics.widthPixels
+                //
+                val params = playerView.layoutParams as FrameLayout.LayoutParams
+
+                params.width = screenWidth
+                params.height = params.width * vidSize.height / vidSize.width
+                playerView.layoutParams = params
+
+            }
         })
+
+
         val uri =
             "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8"
         val mediaItem = MediaItem.fromUri(uri)
@@ -151,14 +184,18 @@ class PlayerFragment : Fragment() {
             }
 
         })
-        exoPlayer?.addAnalyticsListener(object :AnalyticsListener{
+
+        exoPlayer?.addAnalyticsListener(object : AnalyticsListener {
 
             override fun onPlayWhenReadyChanged(
                 eventTime: AnalyticsListener.EventTime,
                 playWhenReady: Boolean,
                 reason: Int
             ) {
-                Log.e(TAG, "Analytics onPlayWhenReadyChanged playWhenReady=$playWhenReady reason=$reason")
+                Log.e(
+                    TAG,
+                    "Analytics onPlayWhenReadyChanged playWhenReady=$playWhenReady reason=$reason"
+                )
             }
 
             override fun onIsPlayingChanged(
@@ -167,6 +204,7 @@ class PlayerFragment : Fragment() {
             ) {
                 Log.e(TAG, "Analytics onIsPlayingChanged isPlaying=$isPlaying")
             }
+
             override fun onRenderedFirstFrame(
                 eventTime: AnalyticsListener.EventTime,
                 output: Any,
@@ -176,21 +214,31 @@ class PlayerFragment : Fragment() {
             }
         })
 
-        exoPlayer?.prepare() //准备（会进行加载）
+//        exoPlayer?.prepare() //准备（会进行加载）
+        this.startPlayer()
+    }
+
+    private fun setFullScreen(enableFullScreen: Boolean) {
+        if (enableFullScreen) {
+            requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+        } else {
+            requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        }
     }
 
     private fun releasePlayer() {
-        exoPlayer?.let { player ->
-            val currentPosition = player.currentPosition //获取当前播放位置（毫秒）
-            val playWhenReady = player.playWhenReady //是否正在播放
-
-            val sharedPreferences =
-                requireContext().getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
-            sharedPreferences.edit()
-                .putLong("currentPosition", currentPosition)
-                .putBoolean("playWhenReady", playWhenReady)
-                .apply()
-        }
+        //API > 23 可以放在 onStop
+//        exoPlayer?.let { player ->
+//            val currentPosition = player.currentPosition //获取当前播放位置（毫秒）
+//            val playWhenReady = player.playWhenReady //是否正在播放
+//
+//            val sharedPreferences =
+//                requireContext().getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+//            sharedPreferences.edit()
+//                .putLong("currentPosition", currentPosition)
+//                .putBoolean("playWhenReady", playWhenReady)
+//                .apply()
+//        }
         //
         exoPlayer?.release()
         exoPlayer = null
@@ -204,4 +252,44 @@ class PlayerFragment : Fragment() {
         exoPlayer?.play() //就是 setPlayWhenReady(true)
     }
 
+    private fun stopPlayer() {
+        exoPlayer?.stop()
+    }
+
+    private fun startPlayer() {
+        exoPlayer?.prepare() //准备（会进行加载）
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        val isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
+        resizePlayerView(isLandscape)
+
+        if (isLandscape) {
+//            hideSystemUI()
+
+        } else {
+
+//            showSystemUI()
+        }
+    }
+
+    private fun resizePlayerView(isLandscape: Boolean) {
+        //横竖屏切换-处理播放器布局
+        val screenWidth = resources.displayMetrics.widthPixels
+
+        val layoutParams = playerView.layoutParams
+
+        if (isLandscape) {
+            //横屏
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+        } else {
+            //竖屏
+            layoutParams.width = screenWidth
+            layoutParams.height = layoutParams.width * vidSize.height / vidSize.width
+        }
+        playerView.layoutParams = layoutParams
+    }
 }
