@@ -6,9 +6,9 @@ package com.louis.javadesignpatterns.behavioral.chain_of_responsibility;
 public class Main {
     public static void main(String[] args) {
         //创建处理者
-        Processor aProcessor = new AProcessor();//组长
-        Processor bProcessor = new BProcessor();//经理
-        Processor cProcessor = new CProcessor();//总监
+        Processor aProcessor = new AProcessor(); //组长
+        Processor bProcessor = new BProcessor(); //经理
+        Processor cProcessor = new CProcessor(); //总监
 
         //设置责任链
         aProcessor.setNextProcessor(bProcessor);
