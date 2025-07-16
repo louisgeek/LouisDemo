@@ -17,6 +17,10 @@ import com.louisgeek.louisaidlserver.IMyAidlInterface
 
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -43,8 +47,9 @@ class MainActivity : AppCompatActivity() {
     private fun initView() {
         val tv: TextView = findViewById(R.id.tv)
         tv.setOnClickListener {
+            Log.e(TAG, "initView: iMyAidlInterface=$iMyAidlInterface")
             val result = iMyAidlInterface?.basicTypes(1, 2, true, 3.0F, 4.0, "5.0")
-            Toast.makeText(this, "result=$result", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "客户端点击收到：$result", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -53,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent("actionMyAidlService")//服务端action
         intent.setPackage("com.louisgeek.louisaidlserver")//服务端包名
         val result = this.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-        Log.e("TAG", "onStart: louis==result=$result" )
+        Log.e("TAG", "onStart: louis==result=$result")
     }
 
     override fun onStop() {

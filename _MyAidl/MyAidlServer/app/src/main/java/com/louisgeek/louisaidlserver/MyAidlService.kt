@@ -24,7 +24,7 @@ class MyAidlService : Service() {
         ): String {
             val result = "$anInt $aLong $aBoolean $aFloat $aDouble $aString"
             Log.e(TAG, "basicTypes: louis===")
-            return "MyAidlService服务端：result=$result"
+            return "MyAidlService服务端收到：$result"
         }
     }
 
