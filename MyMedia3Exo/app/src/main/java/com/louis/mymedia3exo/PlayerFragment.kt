@@ -15,6 +15,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.ui.PlayerView
 
 
@@ -138,17 +139,41 @@ class PlayerFragment : Fragment() {
         exoPlayer?.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 when (playbackState) {
-                    Player.STATE_IDLE -> Log.d(TAG, "无资源或播放结束")
-                    Player.STATE_BUFFERING -> Log.d(TAG, "加载中")
-                    Player.STATE_READY -> Log.d(TAG, "准备就绪")
-                    Player.STATE_ENDED -> Log.d(TAG, "播放完成")
+                    Player.STATE_IDLE -> Log.d(TAG, "onPlaybackStateChanged 无资源或播放结束")
+                    Player.STATE_BUFFERING -> Log.d(TAG, "onPlaybackStateChanged 加载中")
+                    Player.STATE_READY -> Log.d(TAG, "onPlaybackStateChanged 准备就绪")
+                    Player.STATE_ENDED -> Log.d(TAG, "onPlaybackStateChanged 播放完成")
                 }
             }
 
             override fun onPlayerError(error: PlaybackException) {
-                Log.e(TAG, "播放错误: $error")
+                Log.e(TAG, "onPlayerError 播放错误=$error")
             }
 
+        })
+        exoPlayer?.addAnalyticsListener(object :AnalyticsListener{
+
+            override fun onPlayWhenReadyChanged(
+                eventTime: AnalyticsListener.EventTime,
+                playWhenReady: Boolean,
+                reason: Int
+            ) {
+                Log.e(TAG, "Analytics onPlayWhenReadyChanged playWhenReady=$playWhenReady reason=$reason")
+            }
+
+            override fun onIsPlayingChanged(
+                eventTime: AnalyticsListener.EventTime,
+                isPlaying: Boolean
+            ) {
+                Log.e(TAG, "Analytics onIsPlayingChanged isPlaying=$isPlaying")
+            }
+            override fun onRenderedFirstFrame(
+                eventTime: AnalyticsListener.EventTime,
+                output: Any,
+                renderTimeMs: Long
+            ) {
+                Log.e(TAG, "Analytics onRenderedFirstFrame 获取到第一帧 renderTimeMs=$renderTimeMs")
+            }
         })
 
         exoPlayer?.prepare() //准备（会进行加载）
