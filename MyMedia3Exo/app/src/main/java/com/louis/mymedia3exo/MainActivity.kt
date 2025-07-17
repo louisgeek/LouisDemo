@@ -1,5 +1,6 @@
 package com.louis.mymedia3exo
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -19,9 +20,25 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val playerFragment = PlayerFragment.newInstance("", "")
+        val fragment = PlayerFragmentPort.newInstance("", "")
         supportFragmentManager.beginTransaction()
-            .replace(R.id.container, playerFragment).commitAllowingStateLoss()
+            .replace(R.id.container, fragment).commitAllowingStateLoss()
 
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        val isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        if (isLandscape) {
+            val fragment = PlayerFragmentLand.newInstance("", "")
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.container, fragment).commitAllowingStateLoss()
+        } else {
+            val fragment = PlayerFragmentPort.newInstance("", "")
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.container, fragment).commitAllowingStateLoss()
+        }
     }
 }
