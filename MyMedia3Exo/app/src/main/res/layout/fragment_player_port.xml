@@ -16,7 +16,8 @@
         android:layout_height="200dp"
         app:resize_mode="fit"
         app:show_buffering="when_playing"
-        app:use_controller="true" />
+        app:surface_type="texture_view"
+        app:use_controller="false" />
 
     <!--    </androidx.media3.ui.AspectRatioFrameLayout>-->
 

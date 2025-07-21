@@ -3,13 +3,17 @@ package com.louis.mymedia3exo
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.media3.common.Player.Listener
+import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 
 
@@ -79,7 +83,7 @@ class PlayerFragmentPort : Fragment() {
 //        this.initializePlayer()
 
         // 将播放器与视图绑定
-        playerView.setPlayer(viewModel.getPlayer());
+        playerView.setPlayer(viewModel.getPlayer())
 
 //        if (savedInstanceState == null) {
 //            val uri =
@@ -87,6 +91,16 @@ class PlayerFragmentPort : Fragment() {
 //            val mediaItem = MediaItem.fromUri(uri)
 ////            viewModel.setMediaItemAndPrepare(mediaItem)
 //        }
+
+        val videoZoomHelper = VideoZoomHelper(playerView)
+        val exp = viewModel.getPlayer() as ExoPlayer
+        exp.addListener(object : Listener {
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                super.onVideoSizeChanged(videoSize)
+//                videoZoomHelper.setVideoSize(Size(videoSize.width, videoSize.height))
+            }
+        })
+
     }
 
     override fun onStart() {
