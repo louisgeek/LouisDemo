@@ -3,6 +3,7 @@ package com.louis.mymedia3exo
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Matrix
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
@@ -216,6 +217,31 @@ class PlayerFragment : Fragment() {
 
 //        exoPlayer?.prepare() //准备（会进行加载）
         this.startPlayer()
+
+
+//        val values = FloatArray(9)
+//        matrix.getValues(values)
+//        val scale = values[Matrix.MSCALE_X]
+//        val curTransX = values[Matrix.MTRANS_X]
+//        val curTransY = values[Matrix.MTRANS_Y]
+//
+//        val scaledWidth = textureView.width * scale
+//        val scaledHeight = textureView.height * scale
+//
+//        val fixX = when {
+//            scaledWidth < textureView.width ->
+//                (textureView.width - scaledWidth) / 2 - curTransX
+//            curTransX > 0f -> -curTransX
+//            scaledWidth + curTransX < textureView.width -> textureView.width - scaledWidth - curTransX
+//            else -> 0f
+//        }
+//
+//        val fixY = when {
+//            scaledHeight < textureView.height -> (textureView.height - scaledHeight) / 2 - curTransY
+//            curTransY > 0f -> -curTransY
+//            scaledHeight + curTransY < textureView.height -> textureView.height - scaledHeight - curTransY
+//            else -> 0f
+//        }
     }
 
     private fun setFullScreen(enableFullScreen: Boolean) {

@@ -2,6 +2,8 @@ package com.louis.mymedia3exo;
 
 import android.content.Context;
 import android.graphics.Matrix;
+import android.graphics.PointF;
+import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -16,46 +18,40 @@ import androidx.media3.common.util.UnstableApi;
 import androidx.media3.ui.PlayerView;
 
 public class VideoZoomHelper {
+    private static final String TAG = "VideoZoomHelper";
     private PlayerView playerView;
+    //
     private Matrix matrix = new Matrix();
     private ScaleGestureDetector scaleGestureDetector;
     private static final float MIN_SCALE = 0.5f;
     private static final float MAX_SCALE = 5.0F;
-    private float curScale = 1.0f;
-    private static final float SLOW_SCALE_FACTOR = 0.3f; // 控制缩放速度的系数
+    private float curScale;
+    private PointF curFocusPoint;
+    //    private static final float SLOW_SCALE_FACTOR = 0.3f; // 控制缩放速度的系数
+    //
     private GestureDetector dragGestureDetector;
 
-    public VideoZoomHelper(PlayerView playerView) {
+    public VideoZoomHelper(PlayerView playerView, float scale, PointF focusPoint, OnZoomListener onZoomListener) {
         this.playerView = playerView;
+        curScale = scale;
+        curFocusPoint = focusPoint;
+        this.onZoomListener = onZoomListener;
+        //
         Context context = playerView.getContext();
 
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
             @Override
             public boolean onScale(@NonNull ScaleGestureDetector detector) {
                 float scaleFactor = detector.getScaleFactor(); //缩放因子 >1 放大，<1 缩小
-                float slowFactor = 1 + (scaleFactor - 1) * SLOW_SCALE_FACTOR;
-                curScale *= slowFactor;
+                curScale *= scaleFactor; //累积缩放比例
                 curScale = Math.max(MIN_SCALE, Math.min(curScale, MAX_SCALE)); //修正
-                matrix.setScale(curScale, curScale, detector.getFocusX(), detector.getFocusY());
-                applyTransform();
+                curFocusPoint.set(detector.getFocusX(), detector.getFocusY());
+                applyScale();
                 return true;
             }
         });
 
         dragGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-            @OptIn(markerClass = UnstableApi.class)
-            @Override
-            public boolean onDown(@NonNull MotionEvent e) {
-//                View videoSurfaceView = playerView.getVideoSurfaceView();
-//                if (videoSurfaceView == null) {
-//                    return false;
-//                }
-//                if (videoSurfaceView instanceof TextureView) {
-//                    TextureView textureView = (TextureView) videoSurfaceView;
-//                    lastMatrix.set(textureView.getMatrix());
-//                }
-                return super.onDown(e);
-            }
 
             @Override
             public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
@@ -76,28 +72,19 @@ public class VideoZoomHelper {
                 matrix.postTranslate(-distanceX, -distanceY);
                 dealMatrixValues(matrix);
 //
-                applyTransform();
+                TextureView textureView = getVideoSurfaceView();
+                if (textureView == null) {
+                    return false;
+                }
+                textureView.setTransform(matrix);
+
                 return super.onScroll(e1, e2, distanceX, distanceY);
             }
         });
 
-        //playerView.setOnTouchListener(null);
         playerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-//                } else if (event.getAction() == MotionEvent.ACTION_UP) {
-//                    mode = MODE_NONE;
-//                }
-//                if (event.getPointerCount() >= 2) {
-//                    mode = MODE_SCALE;
-//                    scaleGestureDetector.onTouchEvent(event);
-//                }
-//                if (event.getPointerCount() == 1) {
-//                    mode = MODE_DRAG;
-//                    dragGestureDetector.onTouchEvent(event);
-//                }
                 scaleGestureDetector.onTouchEvent(event);
                 if (!scaleGestureDetector.isInProgress()) {
                     if (event.getPointerCount() == 1) {
@@ -107,6 +94,11 @@ public class VideoZoomHelper {
                 return true;
             }
         });
+
+
+        //init
+        applyScale();
+
     }
 
     @OptIn(markerClass = UnstableApi.class)
@@ -146,16 +138,35 @@ public class VideoZoomHelper {
         matrix.setValues(matrixValues);
     }
 
-    @OptIn(markerClass = UnstableApi.class)
-    private void applyTransform() {
-        View videoSurfaceView = playerView.getVideoSurfaceView();
-        if (videoSurfaceView == null) {
+    private void applyScale() {
+        matrix.postScale(curScale, curScale, curFocusPoint.x, curFocusPoint.y);
+        Log.e(TAG, "applyScale: curScale=" + curScale + " curFocusPoint=" + curFocusPoint);
+        //
+        TextureView textureView = getVideoSurfaceView();
+        if (textureView == null) {
             return;
         }
-        if (videoSurfaceView instanceof TextureView) {
-            TextureView textureView = (TextureView) videoSurfaceView;
-            textureView.setTransform(matrix);
+        textureView.setTransform(matrix);
+        //
+        if (onZoomListener != null) {
+            onZoomListener.onZoom(curScale, curFocusPoint);
         }
+    }
+
+    private void applyTranslate() {
+
+    }
+
+    @OptIn(markerClass = UnstableApi.class)
+    private TextureView getVideoSurfaceView() {
+        View videoSurfaceView = playerView.getVideoSurfaceView();
+        if (videoSurfaceView == null) {
+            return null;
+        }
+        if (videoSurfaceView instanceof TextureView) {
+            return (TextureView) videoSurfaceView;
+        }
+        return null;
     }
 
     private void dealTranslation() {
@@ -185,5 +196,9 @@ public class VideoZoomHelper {
         return matrixValues[Matrix.MSCALE_X];
     }
 
+    private OnZoomListener onZoomListener;
 
+    public interface OnZoomListener {
+        void onZoom(float scale, PointF focusPoint);
+    }
 }

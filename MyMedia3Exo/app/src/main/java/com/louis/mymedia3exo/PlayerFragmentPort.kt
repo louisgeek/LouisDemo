@@ -1,7 +1,9 @@
 package com.louis.mymedia3exo
 
+import ZoomablePlayerHelper
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.PointF
 import android.os.Bundle
 import android.util.Size
 import android.view.LayoutInflater
@@ -15,6 +17,7 @@ import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import com.louis.mymedia3exo.VideoZoomHelper.OnZoomListener
 
 
 class PlayerFragmentPort : Fragment() {
@@ -59,6 +62,8 @@ class PlayerFragmentPort : Fragment() {
 
     private lateinit var playerView: PlayerView
     private lateinit var fullscreen: View
+    private var curScale = 1.0f
+    private var curFocusPoint = PointF()
 
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -92,12 +97,29 @@ class PlayerFragmentPort : Fragment() {
 ////            viewModel.setMediaItemAndPrepare(mediaItem)
 //        }
 
-        val videoZoomHelper = VideoZoomHelper(playerView)
+//        curScale = 2.0f
+
+//        val playViewManager = PlayViewManager(playerView, curScale, curFocusPoint, object : PlayViewManager.OnZoomListener {
+//        val playViewManager = PlayViewManager2(playerView, curScale, curFocusPoint, object : PlayViewManager2.OnZoomListener {
+        val playViewManager = PlayViewManager3(
+            playerView,
+            curScale,
+            curFocusPoint,
+            object : PlayViewManager3.OnZoomListener {
+                override fun onZoom(scale: Float, focusPoint: PointF) {
+//                curScale = scale
+//                curFocusPoint = focusPoint
+                }
+
+            })
+//        val xxxx = VideoGestureHandler(playerView)
+//        val xxxx = ZoomablePlayerHelper(playerView)
+
         val exp = viewModel.getPlayer() as ExoPlayer
         exp.addListener(object : Listener {
             override fun onVideoSizeChanged(videoSize: VideoSize) {
                 super.onVideoSizeChanged(videoSize)
-//                videoZoomHelper.setVideoSize(Size(videoSize.width, videoSize.height))
+//                playViewManager.setVideoSize(Size(videoSize.width, videoSize.height))
             }
         })
 
