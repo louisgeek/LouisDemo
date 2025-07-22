@@ -41,20 +41,27 @@ class ZoomablePlayerHelper(private val playerView: PlayerView) {
             val viewWidth = playerView.width.toFloat()
             val viewHeight = playerView.height.toFloat()
 
+            val textureViewWidth = textureView.width.toFloat()
+            val textureViewHeight = textureView.height.toFloat()
 
-            val rect = RectF(0f, 0f, textureView.width.toFloat(), textureView.height.toFloat())
+//            val scaledWidth = textureViewWidth * curScale
+//            val scaledHeight = textureViewHeight * curScale
+
+            val rect = RectF(0f, 0f, textureViewWidth, textureViewHeight)
             matrix.mapRect(rect)
 
             val fixDx = when {
-                rect.width() <= viewWidth -> viewWidth / 2 - rect.centerX()
-                rect.left + dx > 0 -> -rect.left
+//                rect.width() <= viewWidth -> viewWidth / 2 - rect.centerX()
+                rect.width() <= viewWidth -> (viewWidth - rect.width()) / 2 - rect.left
+                rect.left + dx > 0 -> 0 - rect.left
                 rect.right + dx < viewWidth -> viewWidth - rect.right
                 else -> dx
             }
 
             val fixDy = when {
-                rect.height() <= viewHeight -> viewHeight / 2 - rect.centerY()
-                rect.top + dy > 0 -> -rect.top
+//                rect.height() <= viewHeight -> viewHeight / 2 - rect.centerY()
+                rect.height() <= viewHeight -> (viewHeight - rect.height()) / 2 - rect.top
+                rect.top + dy > 0 -> 0 - rect.top
                 rect.bottom + dy < viewHeight -> viewHeight - rect.bottom
                 else -> dy
             }
@@ -80,30 +87,33 @@ class ZoomablePlayerHelper(private val playerView: PlayerView) {
     private fun applyMatrix() = textureView.setTransform(matrix)
 
     private fun fixBounds() {
-//        val values = FloatArray(9)
-//        matrix.getValues(values)
-//        val scale = values[Matrix.MSCALE_X]
-//        val tx = values[Matrix.MTRANS_X]
-//        val ty = values[Matrix.MTRANS_Y]
-//
-//        val contentW = textureView.width * scale
-//        val contentH = textureView.height * scale
-//
-//        val fixX = when {
-//            contentW <= width -> (width - contentW) / 2 - tx
-//            tx > 0 -> -tx
-//            contentW + tx < width -> width - contentW - tx
-//            else -> 0f
-//        }
-//
-//        val fixY = when {
-//            contentH <= height -> (height - contentH) / 2 - ty
-//            ty > 0 -> -ty
-//            contentH + ty < height -> height - contentH - ty
-//            else -> 0f
-//        }
-//
-//        matrix.postTranslate(fixX, fixY)
-//        applyMatrix()
+        val values = FloatArray(9)
+        matrix.getValues(values)
+        val scale = values[Matrix.MSCALE_X]
+        val transX = values[Matrix.MTRANS_X]
+        val transY = values[Matrix.MTRANS_Y]
+
+        val textureViewWidth = textureView.width
+        val textureViewHeight = textureView.height
+
+        val scaledWidth = textureViewWidth * scale
+        val scaledHeight = textureViewHeight * scale
+
+        val fixX = when {
+            scaledWidth <= textureViewWidth -> (textureViewWidth - scaledWidth) / 2 - transX
+            transX > 0 -> 0 - transX
+            scaledWidth + transX < textureViewWidth -> textureViewWidth - (scaledWidth + transX)
+            else -> 0f
+        }
+
+        val fixY = when {
+            scaledHeight <= textureViewHeight -> (textureViewHeight - scaledHeight) / 2 - transY
+            transY > 0 -> 0 - transY
+            scaledHeight + transY < textureViewHeight -> textureViewHeight - (scaledHeight + transY)
+            else -> 0f
+        }
+
+        matrix.postTranslate(fixX, fixY)
+        applyMatrix()
     }
 }

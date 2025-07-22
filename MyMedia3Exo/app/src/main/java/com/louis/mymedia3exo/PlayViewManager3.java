@@ -62,6 +62,12 @@ public class PlayViewManager3 {
                 applyTransform();
                 return true;
             }
+
+            @Override
+            public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
+                super.onScaleEnd(detector);
+                fixBounds();
+            }
         });
 
         dragGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
@@ -128,6 +134,9 @@ public class PlayViewManager3 {
             public boolean onTouch(View v, MotionEvent event) {
                 scaleGestureDetector.onTouchEvent(event);
                 dragGestureDetector.onTouchEvent(event);
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    fixBounds();
+                }
                 return true;
             }
         });
@@ -255,6 +264,48 @@ public class PlayViewManager3 {
 //        curTransY = transY;
     }
 
+    private void fixBounds() {
+        float[] matrixValues = new float[9];
+        matrix.getValues(matrixValues);
+        float scale = matrixValues[Matrix.MSCALE_X];
+        float transX = matrixValues[Matrix.MTRANS_X];
+        float transY = matrixValues[Matrix.MTRANS_Y];
+
+        View videoSurfaceView = getVideoSurfaceView();
+        if (videoSurfaceView == null) {
+            return;
+        }
+        float textureViewWidth = videoSurfaceView.getWidth();
+        float textureViewHeight = videoSurfaceView.getHeight();
+
+        float scaledWidth = textureViewWidth * scale;
+        float scaledHeight = textureViewHeight * scale;
+
+        float fixX;
+        if (scaledWidth <= textureViewWidth) {
+            fixX = (textureViewWidth - scaledWidth) / 2 - transX;
+        } else if (transX > 0) {
+            fixX = 0 - transX;
+        } else if (scaledWidth + transX < textureViewWidth) {
+            fixX = textureViewWidth - (scaledWidth + transX);
+        } else {
+            fixX = 0f;
+        }
+
+        float fixY;
+        if (scaledHeight <= textureViewHeight) {
+            fixY = (textureViewHeight - scaledHeight) / 2 - transY;
+        } else if (transY > 0) {
+            fixY = 0 - transY;
+        } else if (scaledHeight + transY < textureViewHeight) {
+            fixY = textureViewHeight - (scaledHeight + transY);
+        } else {
+            fixY = 0f;
+        }
+
+        matrix.postTranslate(fixX, fixY);
+        applyTransform();
+    }
     private float getScaleXFromMatrix(Matrix matrix) {
         float[] matrixValues = new float[9];
         matrix.getValues(matrixValues);

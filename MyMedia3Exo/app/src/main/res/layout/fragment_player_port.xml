@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@android:color/holo_orange_light"
     android:layout_height="match_parent"
-    android:background="@android:color/holo_blue_light"
     tools:context=".PlayerFragment">
 
     <!--    <androidx.media3.ui.AspectRatioFrameLayout-->
@@ -13,9 +13,9 @@
 
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
+        android:background="@android:color/holo_green_light"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@android:color/holo_green_light"
         app:layout_constraintDimensionRatio="4:3"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
