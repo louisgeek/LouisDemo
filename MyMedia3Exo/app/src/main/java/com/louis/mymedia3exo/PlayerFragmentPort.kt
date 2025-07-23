@@ -4,9 +4,12 @@ import ZoomablePlayerHelper
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.PointF
+import android.graphics.SurfaceTexture
 import android.os.Bundle
+import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
+import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.OptIn
@@ -90,6 +93,44 @@ class PlayerFragmentPort : Fragment() {
         // 将播放器与视图绑定
         playerView.setPlayer(viewModel.getPlayer())
 
+        val textureView = playerView.videoSurfaceView as TextureView
+
+        textureView.surfaceTextureListener = SurfaceTextureProxy(
+            textureView.surfaceTextureListener,
+            object : SurfaceTextureProxy.Listener {
+                override fun onSurfaceTextureAvailable(
+                    surface: SurfaceTexture?,
+                    width: Int,
+                    height: Int
+                ) {
+                    Log.e(TAG, "onSurfaceTextureAvailable: zfq01")
+                }
+            })
+//        textureView.surfaceTextureListener = object :TextureView.SurfaceTextureListener{
+//            override fun onSurfaceTextureAvailable(
+//                surface: SurfaceTexture,
+//                width: Int,
+//                height: Int
+//            ) {
+//                Log.e(TAG, "onSurfaceTextureAvailable: zfq02" )
+//            }
+//
+//            override fun onSurfaceTextureSizeChanged(
+//                surface: SurfaceTexture,
+//                width: Int,
+//                height: Int
+//            ) {
+//            }
+//
+//            override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
+//
+//                return true
+//            }
+//
+//            override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {
+//            }
+//
+//        }
 //        if (savedInstanceState == null) {
 //            val uri =
 //                "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8"
@@ -100,18 +141,18 @@ class PlayerFragmentPort : Fragment() {
 //        curScale = 2.0f
 
         val playViewManager = PlayViewManager(playerView, object : PlayViewManager.OnZoomListener {
-//        val playViewManager = PlayViewManager2(playerView, curScale, curFocusPoint, object : PlayViewManager2.OnZoomListener {
+            //        val playViewManager = PlayViewManager2(playerView, curScale, curFocusPoint, object : PlayViewManager2.OnZoomListener {
 //        val playViewManager = PlayViewManager3(
 //            playerView,
 //            curScale,
 //            curFocusPoint,
 //            object : PlayViewManager3.OnZoomListener {
-override fun onZoom(scale: Float) {
+            override fun onZoom(scale: Float) {
 //                curScale = scale
 //                curFocusPoint = focusPoint
-                }
+            }
 
-            })
+        })
 //        val xxxx = VideoGestureHandler(playerView)
 //        val xxxx = ZoomablePlayerHelper(playerView)
 
