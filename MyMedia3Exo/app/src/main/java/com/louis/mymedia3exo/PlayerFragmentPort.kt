@@ -99,14 +99,14 @@ class PlayerFragmentPort : Fragment() {
 
 //        curScale = 2.0f
 
-//        val playViewManager = PlayViewManager(playerView, curScale, curFocusPoint, object : PlayViewManager.OnZoomListener {
+        val playViewManager = PlayViewManager(playerView, object : PlayViewManager.OnZoomListener {
 //        val playViewManager = PlayViewManager2(playerView, curScale, curFocusPoint, object : PlayViewManager2.OnZoomListener {
-        val playViewManager = PlayViewManager3(
-            playerView,
-            curScale,
-            curFocusPoint,
-            object : PlayViewManager3.OnZoomListener {
-                override fun onZoom(scale: Float, focusPoint: PointF) {
+//        val playViewManager = PlayViewManager3(
+//            playerView,
+//            curScale,
+//            curFocusPoint,
+//            object : PlayViewManager3.OnZoomListener {
+override fun onZoom(scale: Float) {
 //                curScale = scale
 //                curFocusPoint = focusPoint
                 }

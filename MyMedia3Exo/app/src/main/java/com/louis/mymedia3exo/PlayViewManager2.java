@@ -27,7 +27,7 @@ public class PlayViewManager2 {
     //缩放
     private ScaleGestureDetector scaleGestureDetector;
     private static final float MIN_SCALE = 1.0f;
-    private static final float MAX_SCALE = 1.8f;
+    private static final float MAX_SCALE = 2.0f;
     private float curScale;
     private PointF curFocusPoint;
     //拖动
@@ -48,15 +48,9 @@ public class PlayViewManager2 {
             public boolean onScale(@NonNull ScaleGestureDetector detector) {
                 float scaleFactor = detector.getScaleFactor(); //缩放因子大于 1 放大，小于 1 缩小
                 Log.i(TAG, "tempLog scaleFactor=" + scaleFactor); //1.02~0.98
-                float newScale = curScale * scaleFactor; //累积 1.0~10.0
-                newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE)); //修正
-                float realFactor = newScale / curScale; //除回去，相当于修正后的 scaleFactor
-                matrix.postScale(realFactor, realFactor, curFocusPoint.x, curFocusPoint.y);
-                curScale = newScale; //记录
+                curScale *= scaleFactor; //累积 1.0~10.0
+                curScale = Math.max(MIN_SCALE, Math.min(curScale, MAX_SCALE)); //修正
                 curFocusPoint.set(detector.getFocusX(), detector.getFocusY());
-                if (onZoomListener != null) {
-                    onZoomListener.onZoom(curScale, curFocusPoint);
-                }
                 applyTransform();
                 return true;
             }
@@ -66,48 +60,20 @@ public class PlayViewManager2 {
 
             @Override
             public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
+                Log.i(TAG, "tempLog distanceX=" + distanceX + " distanceY=" + distanceY); //
+                float curScale = getScaleXFromMatrix(matrix);
                 if (curScale <= MIN_SCALE) {
                     //未放大，不响应拖动
+                    Log.i(TAG, "tempLog curScale=" + curScale); //
                     return false;
                 }
-                //distanceX 横向滑动距离，负值表示右滑 distanceY 纵向滑动距离，负值表示下滑
+                //累积 distanceX 横向滑动距离，负值表示右滑 distanceY 纵向滑动距离，负值表示下滑
                 float deltaX = -distanceX; //distanceX 右滑 -4~-2   左滑 2~4
                 float deltaY = -distanceY;
 
-//                curTransX += deltaX; //累积
-//                curTransY += deltaY;
-//                dealTrans(); //修正
-                var newTransX = curTransX + deltaX; //累积
-                var newTransY = curTransY + deltaY;
-
-                View videoSurfaceView = getVideoSurfaceView();
-                if (videoSurfaceView == null) {
-                    return false;
-                }
-                float viewWidth = videoSurfaceView.getWidth(); //733
-                float viewHeight = videoSurfaceView.getHeight(); //550
-                float scaledWidth = viewWidth * curScale; //1466
-                float scaledHeight = viewHeight * curScale; //1100
-
-                //限制 x 方向平移
-                float maxTransX = (scaledWidth - viewWidth) / 2f; //右边界
-                float minTransX = -maxTransX;
-//                float maxTransX = scaledWidth - viewWidth;
-//                float minTransX = 0;
-                newTransX = Math.max(minTransX, Math.min(newTransX, maxTransX));
-
-                float maxTransY = (scaledHeight - viewHeight) / 2f; //
-                float minTransY = -maxTransY;
-                newTransY = Math.max(minTransY, Math.min(newTransY, maxTransY));
-
-                float realDeltaX = newTransX - curTransX; //减回去
-                float realDeltaY = newTransY - curTransY; //
-                //
-                matrix.postTranslate(realDeltaX, realDeltaY);
-
-                curTransX = newTransX;
-                curTransY = newTransY;
-                //
+                curTransX += deltaX; //累积
+                curTransY += deltaY;
+                dealTrans(); //修正
                 applyTransform();
                 return super.onScroll(e1, e2, distanceX, distanceY);
             }
@@ -117,7 +83,11 @@ public class PlayViewManager2 {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 scaleGestureDetector.onTouchEvent(event);
-                dragGestureDetector.onTouchEvent(event);
+                if (!scaleGestureDetector.isInProgress()) {
+                    if (event.getPointerCount() == 1) {
+                        dragGestureDetector.onTouchEvent(event);
+                    }
+                }
                 return true;
             }
         });
@@ -130,7 +100,7 @@ public class PlayViewManager2 {
                     Log.e(TAG, "onIsPlayingChanged: isPlaying=" + isPlaying);
                     if (isPlaying) {
                         //init
-//                        applyTransform();
+                        applyTransform();
                     }
                 }
             });
@@ -138,14 +108,26 @@ public class PlayViewManager2 {
     }
 
 
+
     private void applyTransform() {
+        matrix.reset(); //curScale 累积
+        matrix.postScale(curScale, curScale, curFocusPoint.x, curFocusPoint.y);
+        Log.e(TAG, "applyScale: curScale=" + curScale + " curFocusPoint=" + curFocusPoint);
+        if (onZoomListener != null) {
+            onZoomListener.onZoom(curScale, curFocusPoint);
+        }
+        //
+        matrix.postTranslate(curTransX, curTransY);
+        Log.i(TAG, "tempLog curTransX=" + curTransX + " curTransY=" + curTransY); //
+//        dealMatrixValues();
+        //
         TextureView textureView = getVideoSurfaceView();
         if (textureView == null) {
             return;
         }
         textureView.setTransform(matrix);
         //支持暂停时处理
-//        textureView.postInvalidate();
+        textureView.postInvalidate();
     }
 
     @OptIn(markerClass = UnstableApi.class)
@@ -197,7 +179,9 @@ public class PlayViewManager2 {
         curTransX = Math.max(minTransX, Math.min(curTransX, maxTransX));
 
         // 最大允许平移距离 = (缩放后宽度 - 视图宽度) / 2
-        Log.i(TAG, "tempLog maxTransX=" + maxTransX + " minTransX=" + minTransX + " curTransX=" + curTransX); //
+        float maxTrans =
+
+                Log.i(TAG, "tempLog maxTransX=" + maxTransX + " minTransX=" + minTransX + " curTransX=" + curTransX); //
         //限制 y 方向平移
         float maxTransY = 0f;
         float minTransY = -(scaledHeight - viewHeight);
@@ -249,18 +233,6 @@ public class PlayViewManager2 {
         float[] matrixValues = new float[9];
         matrix.getValues(matrixValues);
         return matrixValues[Matrix.MSCALE_X];
-    }
-
-    private float getTransXFromMatrix(Matrix matrix) {
-        float[] matrixValues = new float[9];
-        matrix.getValues(matrixValues);
-        return matrixValues[Matrix.MTRANS_X];
-    }
-
-    private float getTransYFromMatrix(Matrix matrix) {
-        float[] matrixValues = new float[9];
-        matrix.getValues(matrixValues);
-        return matrixValues[Matrix.MTRANS_Y];
     }
 
     private OnZoomListener onZoomListener;

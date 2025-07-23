@@ -116,4 +116,73 @@ class ZoomablePlayerHelper(private val playerView: PlayerView) {
         matrix.postTranslate(fixX, fixY)
         applyMatrix()
     }
+
+    // 边界检查（防止内容移出屏幕）
+    private fun applyBoundaryCheck() {
+        val rect = FloatArray(9)
+        matrix.getValues(rect)
+        val transX = rect[Matrix.MTRANS_X]
+        val transY = rect[Matrix.MTRANS_Y]
+
+        // 计算最大允许平移量
+//        val maxTransX = (contentWidth * scaleFactor - viewportWidth).coerceAtLeast(0f)
+//        val maxTransY = (contentHeight * scaleFactor - viewportHeight).coerceAtLeast(0f)
+//
+//        // 限制平移范围
+//        rect[Matrix.MTRANS_X] = transX.coerceIn(-maxTransX, 0f)
+//        rect[Matrix.MTRANS_Y] = transY.coerceIn(-maxTransY, 0f)
+//        matrix.setValues(rect)
+    }
+
+    private fun checkBorderAndCenter() {
+//        val rect = getMatrixRectF()
+//        val width = width.toFloat()
+//        val height = height.toFloat()
+//
+//        if (rect.width() > width) {
+//            if (rect.left > 0) matrix.postTranslate(-rect.left, 0)
+//            if (rect.right < width) matrix.postTranslate(width - rect.right, 0)
+//        } else {
+//            matrix.postTranslate((width - rect.width()) / 2 - rect.left, 0)
+//        }
+//
+//        if (rect.height() > height) {
+//            if (rect.top > 0) matrix.postTranslate(0, -rect.top)
+//            if (rect.bottom < height) matrix.postTranslate(0, height - rect.bottom)
+//        } else {
+//            matrix.postTranslate(0, (height - rect.height()) / 2 - rect.top)
+//        }
+    }
+
+    private fun getMatrixRectF(): RectF {
+        val rect = RectF()
+//        matrix.mapRect(rect, RectF(0f, 0f, intrinsicWidth.toFloat(), intrinsicHeight.toFloat()))
+        return rect
+    }
+
+    private fun animateScale(targetScale: Float, pivotX: Float, pivotY: Float) {
+//        val animator = ValueAnimator.ofFloat(currentScale, targetScale).apply {
+//            duration = 300
+//            addUpdateListener {
+//                currentScale = it.animatedValue as Float
+//                matrix.setScale(currentScale, currentScale, pivotX, pivotY)
+//                checkBorder()
+//                invalidate()
+//            }
+//        }
+//        animator.start()
+    }
+
+//    private fun animateScale(targetScale: Float, focusX: Float, focusY: Float) {
+//        val scaleDiff = targetScale - currentScale
+//        val animator = ValueAnimator.ofFloat(1f, scaleDiff)
+//        animator.addUpdateListener { animation ->
+//            val factor = animation.animatedValue as Float
+//            currentScale = currentScale + factor
+//            matrix.postScale(factor, factor, focusX, focusY)
+//            setImageMatrix(matrix)
+//        }
+//        animator.duration = 200
+//        animator.start()
+//    }
 }
