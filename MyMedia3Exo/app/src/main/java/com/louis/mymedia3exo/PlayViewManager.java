@@ -1,6 +1,7 @@
 package com.louis.mymedia3exo;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -43,13 +44,16 @@ public class PlayViewManager {
         Context context = playerView.getContext();
 
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            /**
+             * 当两个手指在屏幕上移动时持续调用
+             */
             @Override
             public boolean onScale(@NonNull ScaleGestureDetector detector) {
-                float scaleFactor = detector.getScaleFactor(); //缩放因子大于 1 放大，小于 1 缩小
-                float newScale = curScale * scaleFactor; //累积 1.0~10.0
-                newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE)); //修正
-                float realFactor = newScale / curScale; //除回去，相当于修正后的 scaleFactor
-                matrix.postScale(realFactor, realFactor, detector.getFocusX(), detector.getFocusY());
+                float scaleFactor = detector.getScaleFactor(); //当前帧的缩放因子（比如 1.05 表示放大 5%，0.95 表示缩小 5%）
+                float newScale = curScale * scaleFactor; //累积
+                newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE)); //修正（限制缩放比例）
+                float realFactor = newScale / curScale; //除回去，相当于修正后的 scaleFactor（计算限制后的实际缩放因子）
+                matrix.postScale(realFactor, realFactor, detector.getFocusX(), detector.getFocusY()); //焦点坐标（两个手指的中心点）
                 curScale = newScale; //记录
                 curFocusPoint.set(detector.getFocusX(), detector.getFocusY());
                 if (onZoomListener != null) {
@@ -68,14 +72,24 @@ public class PlayViewManager {
 
         dragGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
 
+//            @Override
+//            public boolean onDown(@NonNull MotionEvent e) {
+//                return true;
+//            }
+
+            /**
+             * 拖动手势中持续触发
+             */
             @Override
             public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
-//                if (curScale <= MIN_SCALE) {
+//                if (curScale <= MIN_SCALE) { //不用 去掉
 //                    //未放大，不处理拖动数据
 //                    //return false;
 //                    return true;
 //                }
-                //distanceX 横向滑动距离，负值表示右滑 distanceY 纵向滑动距离，负值表示下滑
+                //distanceX 和 distanceY 表示当前事件和上一个事件之间的移动距离（不是总距离）
+                //distanceX 横向滑动距离，向右滑动为负数，x 值减小，向左滑动正数，x 值增加（preX - curX）
+                //distanceX 纵向滑动距离，向下滑动负数，y 值减小，向上滑动正数，y 增加(preY - curY)
                 float dx = -distanceX; //distanceX 右滑 -4~-2   左滑 2~4
                 float dy = -distanceY;
 
@@ -140,6 +154,7 @@ public class PlayViewManager {
         });
 
         playerView.setOnTouchListener(new View.OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 scaleGestureDetector.onTouchEvent(event);
