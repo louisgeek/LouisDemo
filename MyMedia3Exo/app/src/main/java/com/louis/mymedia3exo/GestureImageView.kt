@@ -21,14 +21,14 @@ class GestureImageView @JvmOverloads constructor(
     private var scaleGestureDetector: ScaleGestureDetector
     private val MIN_SCALE = 0.5f
     private val MAX_SCALE = 3.0f
-    private var curScale = 1f
+    private var currScale = 1f
 
     //拖动
     private var dragGestureDetector: GestureDetector
 
     //旋转
     private var rotationGestureDetector: RotationGestureDetector
-    private var curRotation = 0f
+    private var currRotation = 0f
 
 
     private var isZoomed = false
@@ -45,14 +45,14 @@ class GestureImageView @JvmOverloads constructor(
                  */
                 override fun onScale(detector: ScaleGestureDetector): Boolean {
                     //detector.scaleFactor 当前帧的缩放因子（比如 1.05 表示放大 5%，0.95 表示缩小 5%）
-                    var newScale = curScale * detector.scaleFactor //累积
+                    var newScale = currScale * detector.scaleFactor //累积
                     newScale = newScale.coerceIn(MIN_SCALE, MAX_SCALE) //修正（限制缩放比例）
-                    val realFactor = newScale / curScale //除回去，相当于修正后的 scaleFactor（计算限制后的实际缩放因子）
+                    val realFactor = newScale / currScale //除回去，相当于修正后的 scaleFactor（计算限制后的实际缩放因子）
 
                     matrix.postScale(
                         realFactor, realFactor, detector.focusX, detector.focusY
                     ) //焦点坐标（两个手指的中心点）
-                    curScale = newScale //记录
+                    currScale = newScale //记录
 
                     applyMatrix()
                     return true
@@ -76,8 +76,8 @@ class GestureImageView @JvmOverloads constructor(
                     e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float
                 ): Boolean {
                     //distanceX 和 distanceY 表示当前事件和上一个事件之间的移动距离（不是总距离）
-                    //distanceX 横向滑动距离，向右滑动为负数，x 值减小，向左滑动正数，x 值增加（preX - curX）
-                    //distanceX 纵向滑动距离，向下滑动负数，y 值减小，向上滑动正数，y 增加(preY - curY)
+                    //distanceX 横向滑动距离，向右滑动为负数，x 值减小，向左滑动正数，x 值增加（prevX - currX）
+                    //distanceX 纵向滑动距离，向下滑动负数，y 值减小，向上滑动正数，y 增加(prevY - currY)
                     val dx = -distanceX //distanceX 右滑 -4~-2   左滑 2~4
                     val dy = -distanceY
                     matrix.postTranslate(dx, dy)
@@ -94,7 +94,7 @@ class GestureImageView @JvmOverloads constructor(
         rotationGestureDetector =
             RotationGestureDetector(object : RotationGestureDetector.OnRotationGestureListener {
                 override fun onRotation(angle: Float) {
-                    curRotation += angle //累积
+                    currRotation += angle //累积
                     val px = width / 2f
                     val py = height / 2f
                     matrix.postRotate(angle, px, py)
@@ -121,8 +121,8 @@ class GestureImageView @JvmOverloads constructor(
 
     private fun zoomImage() {
 //        log("currentScale:$currentScale,isZoomed:$isZoomed")
-        isZoomed = curScale > mDefaultScale
-        if (curScale == mDefaultScale) {
+        isZoomed = currScale > mDefaultScale
+        if (currScale == mDefaultScale) {
             scaleFactor = if (isZoomed) 0.5f else 2f
             matrix.postScale(scaleFactor, scaleFactor, width / 2f, height / 2f)
             isZoomed = !isZoomed
@@ -130,7 +130,7 @@ class GestureImageView @JvmOverloads constructor(
             invalidate()
         } else {
             setImgToCenter(this)
-            curScale = mDefaultScale
+            currScale = mDefaultScale
             isZoomed = false
         }
     }

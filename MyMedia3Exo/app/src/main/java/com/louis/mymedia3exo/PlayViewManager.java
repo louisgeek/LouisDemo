@@ -30,12 +30,12 @@ public class PlayViewManager {
     private ScaleGestureDetector scaleGestureDetector;
     private static final float MIN_SCALE = 1.0f;
     private static final float MAX_SCALE = 10.0f;
-    private float curScale = 1f;
-    private PointF curFocusPoint = new PointF();
+    private float currScale = 1f;
+    private PointF currFocusPoint = new PointF();
     //拖动
     private GestureDetector dragGestureDetector;
-    private float curTransX;
-    private float curTransY;
+    private float currTransX;
+    private float currTransY;
 
     public PlayViewManager(PlayerView playerView, OnZoomListener onZoomListener) {
         this.playerView = playerView;
@@ -50,14 +50,14 @@ public class PlayViewManager {
             @Override
             public boolean onScale(@NonNull ScaleGestureDetector detector) {
                 float scaleFactor = detector.getScaleFactor(); //当前帧的缩放因子（比如 1.05 表示放大 5%，0.95 表示缩小 5%）
-                float newScale = curScale * scaleFactor; //累积
+                float newScale = currScale * scaleFactor; //累积
                 newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE)); //修正（限制缩放比例）
-                float realFactor = newScale / curScale; //除回去，相当于修正后的 scaleFactor（计算限制后的实际缩放因子）
+                float realFactor = newScale / currScale; //除回去，相当于修正后的 scaleFactor（计算限制后的实际缩放因子）
                 matrix.postScale(realFactor, realFactor, detector.getFocusX(), detector.getFocusY()); //焦点坐标（两个手指的中心点）
-                curScale = newScale; //记录
-                curFocusPoint.set(detector.getFocusX(), detector.getFocusY());
+                currScale = newScale; //记录
+                currFocusPoint.set(detector.getFocusX(), detector.getFocusY());
                 if (onZoomListener != null) {
-                    onZoomListener.onZoom(curScale);
+                    onZoomListener.onZoom(currScale);
                 }
                 applyTransform();
                 return true;
@@ -145,8 +145,8 @@ public class PlayViewManager {
                 //
                 float[] matrixValues = new float[9];
                 matrix.getValues(matrixValues);
-                curTransX = matrixValues[Matrix.MTRANS_X];
-                curTransY = matrixValues[Matrix.MTRANS_Y];
+                currTransX = matrixValues[Matrix.MTRANS_X];
+                currTransY = matrixValues[Matrix.MTRANS_Y];
                 //
                 applyTransform();
                 return true;
@@ -172,15 +172,15 @@ public class PlayViewManager {
                 @Override
                 public void onIsPlayingChanged(boolean isPlaying) {
                     if (isPlaying) { //init
-                        matrix.setScale(curScale, curScale, curFocusPoint.x, curFocusPoint.y);
+                        matrix.setScale(currScale, currScale, currFocusPoint.x, currFocusPoint.y);
 //                        matrix.postTranslate(curTransX, curTransY);
 //                        matrix.reset();
 //                        matrix.postScale(curScale, curScale, curFocusPoint.x, curFocusPoint.y);
                         //
                         float[] matrixValues = new float[9];
                         matrix.getValues(matrixValues);
-                        matrixValues[Matrix.MTRANS_X] = curTransX;
-                        matrixValues[Matrix.MTRANS_Y] = curTransY;
+                        matrixValues[Matrix.MTRANS_X] = currTransX;
+                        matrixValues[Matrix.MTRANS_Y] = currTransY;
                         matrix.setValues(matrixValues);
 
                         applyTransform();
@@ -228,8 +228,8 @@ public class PlayViewManager {
 //        }
         float viewWidth = videoSurfaceView.getWidth(); //733
         float viewHeight = videoSurfaceView.getHeight(); //550
-        float scaledWidth = viewWidth * curScale; //1466
-        float scaledHeight = viewHeight * curScale; //1100
+        float scaledWidth = viewWidth * currScale; //1466
+        float scaledHeight = viewHeight * currScale; //1100
 //        Log.i(TAG, "tempLogss transX=" + transX + " curTransX=" + curTransX*curScale2); //
         //1080  618
         //scaledWidth - textureView.getWidth() = 2160-1080
@@ -247,16 +247,16 @@ public class PlayViewManager {
         float minTransX = -maxTransX;
 //        float maxTransX = (curScale - 1) * textureView.getWidth() / 2;
 //        float maxTransX = Math.max(0, scaledWidth - textureView.getWidth()) / 2;
-        curTransX = Math.max(minTransX, Math.min(curTransX, maxTransX));
+        currTransX = Math.max(minTransX, Math.min(currTransX, maxTransX));
 
         // 最大允许平移距离 = (缩放后宽度 - 视图宽度) / 2
-        Log.i(TAG, "tempLog maxTransX=" + maxTransX + " minTransX=" + minTransX + " curTransX=" + curTransX); //
+        Log.i(TAG, "tempLog maxTransX=" + maxTransX + " minTransX=" + minTransX + " curTransX=" + currTransX); //
         //限制 y 方向平移
         float maxTransY = 0f;
         float minTransY = -(scaledHeight - viewHeight);
 //        float maxTransY = (curScale - 1) * viewHeight / 2;
 //        float maxTransY = Math.max(0, scaledHeight - textureView.getHeight()) / 2;
-        curTransY = Math.max(minTransY, Math.min(curTransY, maxTransY));
+        currTransY = Math.max(minTransY, Math.min(currTransY, maxTransY));
     }
 
     private void dealMatrixValues() {

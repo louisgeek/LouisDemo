@@ -12,23 +12,23 @@ class RotationGestureDetector(private val listener: OnRotationGestureListener) {
         private const val TAG = "RotationGestureDetector"
     }
 
-    private var curAngle = 0f
+    private var currAngle = 0f
 
     fun onTouchEvent(event: MotionEvent) {
         when (event.actionMasked) {
             MotionEvent.ACTION_POINTER_DOWN -> {
                 if (event.pointerCount == 2) {
-                    curAngle = calculateAngle(event)
+                    currAngle = calculateAngle(event)
                 }
             }
 
             MotionEvent.ACTION_MOVE -> {
                 if (event.pointerCount == 2) {
                     val newAngle = calculateAngle(event)
-                    val angle = newAngle - curAngle
+                    val angle = newAngle - currAngle
                     listener.onRotation(angle)
 
-                    curAngle = newAngle //记录
+                    currAngle = newAngle //记录
                 }
             }
 
