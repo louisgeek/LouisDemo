@@ -21,11 +21,17 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val drawBoardView: DrawBoardView = findViewById(R.id.bView)
+//        val drawBoardView: DrawBoardView2 = findViewById(R.id.bView)
         val idbtn: Button = findViewById(R.id.id_btn)
         idbtn.setOnClickListener {
-            val intent = Intent(this@MainActivity, NextActivity::class.java)
-            startActivity(intent)
+//            val intent = Intent(this@MainActivity, NextActivity::class.java)
+//            startActivity(intent)
+            drawBoardView.isEraserMode = !drawBoardView.isEraserMode
         }
-
+        idbtn.setOnLongClickListener {
+            drawBoardView.clearCanvas()
+            true
+        }
     }
 }

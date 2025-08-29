@@ -43,4 +43,11 @@
 
     </FrameLayout>
 
+    <com.louis.myview.DrawBoardView
+        android:id="@+id/bView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="500dp"
+        android:layout_height="500dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
