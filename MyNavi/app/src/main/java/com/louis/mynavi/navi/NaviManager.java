@@ -6,6 +6,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import java.util.Map;
+
 public class NaviManager {
     private FragmentManager fragmentManager;
 
@@ -19,6 +21,31 @@ public class NaviManager {
         return backStackTag;
     }
 
+    public void setArguments(Fragment fragment, Map<String, Object> params) {
+        if (params != null && !params.isEmpty()) {
+            Bundle bundle = new Bundle();
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (value instanceof String) {
+                    bundle.putString(key, (String) value);
+                } else if (value instanceof Integer) {
+                    bundle.putInt(key, (Integer) value);
+                } else if (value instanceof Boolean) {
+                    bundle.putBoolean(key, (Boolean) value);
+                } else if (value instanceof Long) {
+                    bundle.putLong(key, (Long) value);
+                } else if (value instanceof Float) {
+                    bundle.putFloat(key, (Float) value);
+                } else if (value instanceof Double) {
+                    bundle.putDouble(key, (Double) value);
+                } else if (value instanceof String[]) {
+                    bundle.putStringArray(key, (String[]) value);
+                }
+            }
+            fragment.setArguments(bundle);
+        }
+    }
     public void navigateTo(int containerId, Fragment fragment, Bundle args, boolean addToBackStack) {
         if (args != null) {
             Bundle arguments = fragment.getArguments();
@@ -40,9 +67,13 @@ public class NaviManager {
     }
 
 
-    public void goBack() {
-        //异步
-        fragmentManager.popBackStack();
+    public boolean goBack() {
+        if (canGoBack()) {
+            //异步
+            fragmentManager.popBackStack();
+            return true;
+        }
+        return false;
     }
 
     public void goBackTo(String backStackTag) {
