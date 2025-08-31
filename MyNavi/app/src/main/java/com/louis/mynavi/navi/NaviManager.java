@@ -45,11 +45,6 @@ public class NaviManager {
         fragmentManager.popBackStack();
     }
 
-    public void goBackImmediate() {
-        //同步
-        boolean success = fragmentManager.popBackStackImmediate();
-    }
-
     public void goBackTo(String backStackTag) {
         //0 保留目标页面
         fragmentManager.popBackStack(backStackTag, 0);
@@ -68,6 +63,11 @@ public class NaviManager {
     public void clearBackStack() {
         //POP_BACK_STACK_INCLUSIVE 连同目标页面一起清除
         fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
+    public void goBackImmediate() {
+        //同步
+        boolean success = fragmentManager.popBackStackImmediate();
     }
 
 
