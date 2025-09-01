@@ -48,7 +48,7 @@ public class NavManager {
     }
 
     public void navigateTo(int containerId, Fragment fragment, Bundle args, boolean addToBackStack) {
-        if (fragment != null) {
+        if (fragment == null) {
             return;
         }
         if (args != null) {

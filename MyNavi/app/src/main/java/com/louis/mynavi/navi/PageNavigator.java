@@ -7,13 +7,26 @@ import androidx.fragment.app.Fragment;
 import com.louis.mynavi.R;
 
 public class PageNavigator {
+    private static PageNavigator instance;
     private NavManager mNavManager;
     private PageNodeManager mPageNodeManager;
 
-    public PageNavigator(NavManager mNavManager, PageNodeManager mPageNodeManager) {
-        this.mNavManager = mNavManager;
-        this.mPageNodeManager = mPageNodeManager;
+    private PageNavigator() {
     }
+
+    public static synchronized PageNavigator getInstance() {
+        if (instance == null) {
+            instance = new PageNavigator();
+        }
+        return instance;
+    }
+
+    public void init(NavManager navManager) {
+        this.mNavManager = navManager;
+        mPageNodeManager = new PageNodeManager();
+
+    }
+
 
     public void addPageNodes(PageNode... pageNodes) {
         mPageNodeManager.addPageNodes(pageNodes);
@@ -26,15 +39,16 @@ public class PageNavigator {
 
     private static final String TAG = "PageNavigator";
 
-    public void navigateTo() {
+    public void navigateToNext() {
 //        List<PageNode> order = mPageNodeManager.topologicalSortOne();
 //        List<PageNode> order = mPageNodeManager.topologicalSortTwo();
         PageNode pageNode = mPageNodeManager.getStartNode();
-        Log.e(TAG, "navigateTo: " + pageNode);
+        Log.e(TAG, "navigateToNext: pageNode=" + pageNode);
         if (pageNode != null) {
             Fragment targetFragment = null;
             try {
                 targetFragment = pageNode.fragmentClass.newInstance(); //类反射
+                Log.e(TAG, "navigateToNext: targetFragment=" + targetFragment);
             } catch (Exception e) {
                 e.printStackTrace();
             }
