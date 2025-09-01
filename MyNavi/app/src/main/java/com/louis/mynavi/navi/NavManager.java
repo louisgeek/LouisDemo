@@ -8,10 +8,10 @@ import androidx.fragment.app.FragmentTransaction;
 
 import java.util.Map;
 
-public class NaviManager {
+public class NavManager {
     private FragmentManager fragmentManager;
 
-    public NaviManager(FragmentManager fragmentManager) {
+    public NavManager(FragmentManager fragmentManager) {
         this.fragmentManager = fragmentManager;
     }
 
@@ -46,7 +46,11 @@ public class NaviManager {
             fragment.setArguments(bundle);
         }
     }
+
     public void navigateTo(int containerId, Fragment fragment, Bundle args, boolean addToBackStack) {
+        if (fragment != null) {
+            return;
+        }
         if (args != null) {
             Bundle arguments = fragment.getArguments();
             if (arguments == null) {
@@ -55,6 +59,9 @@ public class NaviManager {
                 arguments.putAll(args);
             }
         }
+
+//        Fragment targetFragment = "".getFragmentClazz().newInstance(); //类反射
+
         String fragmentTag = fragment.getClass().getSimpleName();
         FragmentTransaction transaction = fragmentManager.beginTransaction()
                 .replace(containerId, fragment, fragmentTag);
@@ -66,6 +73,9 @@ public class NaviManager {
         transaction.commit();
     }
 
+    public Fragment findFragmentByTag(String fragmentTag) {
+        return fragmentManager.findFragmentByTag(fragmentTag);
+    }
 
     public boolean goBack() {
         if (canGoBack()) {

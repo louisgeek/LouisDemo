@@ -1,6 +1,6 @@
 package com.louis.mynavi.navi;
 
-interface PageCondition {
+public interface PageCondition {
     /**
      * 校验条件是否满足
      *
