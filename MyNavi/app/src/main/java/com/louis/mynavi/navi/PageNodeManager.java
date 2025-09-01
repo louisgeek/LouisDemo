@@ -54,9 +54,7 @@ public class PageNodeManager {
         //计算入度（基于 dependencies）
         for (PageNode node : pageNodeMap.values()) {
             for (PageNode dep : node.dependencies) {
-                if (inDegree.containsKey(dep.fragmentTag)) {
-                    inDegree.put(dep.fragmentTag, inDegree.get(dep.fragmentTag) + 1);
-                }
+                inDegree.put(dep.fragmentTag, inDegree.get(dep.fragmentTag) + 1);
             }
         }
 //        for (String node : graph.keySet()) {
@@ -67,7 +65,8 @@ public class PageNodeManager {
         //初始队列（入度为 0 且条件满足）
         Queue<String> queue = new LinkedList<>();
         for (PageNode node : pageNodeMap.values()) {
-            if (inDegree.get(node.fragmentTag) == 0 && node.condition.isSatisfied()) {
+//            if (inDegree.get(node.fragmentTag) == 0 && node.condition.isSatisfied()) {
+            if (inDegree.get(node.fragmentTag) == 0) {
                 queue.offer(node.fragmentTag); //入队
             }
         }
@@ -76,17 +75,81 @@ public class PageNodeManager {
         while (!queue.isEmpty()) {
             String current = queue.poll();
             result.add(current);
+            PageNode currentNode = pageNodeMap.get(current);
+            if (currentNode == null) {
+                continue;
+            }
 
             //减少依赖当前节点的其他节点的入度               // 更新依赖此节点的其他节点的入度
-            for (PageNode node : pageNodeMap.values()) {
-                if (node.dependencies.contains(current)) {
-                    //减少入度
-                    int newDegree = inDegree.get(node.fragmentTag) - 1;
-                    inDegree.put(node.fragmentTag, newDegree);
-                    //入度为 0 则入队
-                    if (newDegree == 0 && node.condition.isSatisfied()) {
-                        queue.offer(node.fragmentTag);
-                    }
+            for (PageNode node : currentNode.dependencies) {
+                //减少入度
+                int newDegree = inDegree.get(node.fragmentTag) - 1;
+                inDegree.put(node.fragmentTag, newDegree);
+                //入度为 0 则入队
+//                if (newDegree == 0 && node.condition.isSatisfied()) {
+                if (newDegree == 0) {
+                    queue.offer(node.fragmentTag);
+                }
+            }
+
+        }
+
+        printDAG();
+
+        // 检查是否存在环（拓扑序列长度 < 总节点数）
+        if (result.size() != pageNodeMap.size()) {
+            throw new IllegalStateException("DAG 存在循环依赖！");
+        }
+
+        return result;
+    }
+
+    public List<String> topologicalSort3() {
+
+        // 计算每个节点的入度
+        Map<String, Integer> inDegree = new HashMap<>();
+        for (String fragmentTag : pageNodeMap.keySet()) {
+            inDegree.put(fragmentTag, 0);
+        }
+
+        // 遍历所有节点，计算每个节点的入度
+        for (PageNode node : pageNodeMap.values()) {
+            for (PageNode dep : node.dependencies) {
+                inDegree.put(dep.fragmentTag, inDegree.get(dep.fragmentTag) + 1);
+            }
+        }
+
+        // 将所有入度为0的节点加入队列
+        Queue<String> queue = new LinkedList<>();
+//        for (Map.Entry<String, Integer> entry : inDegree.entrySet()) {
+//            if (entry.getValue() == 0 && entry.getValue().condition.isSatisfied()) {
+//                queue.offer(entry.getKey());
+//            }
+//        }
+        for (PageNode node : pageNodeMap.values()) {
+            if (inDegree.get(node.fragmentTag) == 0 && node.condition.isSatisfied()) {
+                queue.offer(node.fragmentTag); //入队
+            }
+        }
+
+        List<String> result = new ArrayList<>();
+
+        // 处理队列中的节点
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+            result.add(current);
+
+            // 获取当前节点
+            PageNode currentNode = getPageNode(current);
+            if (currentNode == null) continue;
+
+            // 遍历当前节点的所有依赖节点
+            for (PageNode node : currentNode.dependencies) {
+                // 减少依赖节点的入度
+                inDegree.put(node.fragmentTag, inDegree.get(node.fragmentTag) - 1);
+                // 如果依赖节点的入度变为0，则加入队列
+                if (inDegree.get(node.fragmentTag) == 0 && node.condition.isSatisfied()) {
+                    queue.offer(node.fragmentTag);
                 }
             }
         }
@@ -97,7 +160,6 @@ public class PageNodeManager {
         if (result.size() != pageNodeMap.size()) {
             throw new IllegalStateException("DAG 存在循环依赖！");
         }
-
         return result;
     }
 
@@ -111,10 +173,8 @@ public class PageNodeManager {
 //        return null; // 无可用节点（所有节点已完成或不可用）
 //    }
     public void printDAG() {
-        for (Map.Entry<String, PageNode> entry : pageNodeMap.entrySet()) {
-            String fragmentTag = entry.getKey();
-            PageNode pageNode = entry.getValue();
-            System.out.println(fragmentTag + " -> " + pageNode.fragmentTag);
+        for (PageNode node : pageNodeMap.values()) {
+            System.out.println(node.fragmentTag + " -> " + Arrays.toString(node.dependencies.toArray()));
         }
     }
 }

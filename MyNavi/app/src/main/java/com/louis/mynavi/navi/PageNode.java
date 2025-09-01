@@ -1,15 +1,11 @@
 package com.louis.mynavi.navi;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * 每个页面对应一个节点
@@ -58,5 +54,17 @@ public class PageNode {
             }
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "PageNode{" +
+                "fragmentTag='" + fragmentTag + '\'' +
+//                ", fragmentClass=" + fragmentClass +
+                ", dependencies=" + dependencies +
+//                ", args=" + args +
+//                ", condition=" + condition +
+                ", condition isSatisfied=" + condition.isSatisfied() +
+                '}';
     }
 }
