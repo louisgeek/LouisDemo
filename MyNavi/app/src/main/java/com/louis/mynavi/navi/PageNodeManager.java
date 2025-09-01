@@ -271,7 +271,13 @@ public class PageNodeManager {
         return sortedNodes.get(sortedNodes.size() - 1);
     }
 
-
+    public String getNextPage(String currentPageId) {
+        PageNode nextPages = pageNodeMap.get(currentPageId);
+        if (nextPages.dependencies != null && !nextPages.dependencies.isEmpty()) {
+            return nextPages.dependencies.get(0); // 返回第一个下一个页面
+        }
+        return null;
+    }
     public void printDAG() {
         for (PageNode node : pageNodeMap.values()) {
             System.out.println(node.fragmentTag + " -> " + Arrays.toString(node.dependencies.toArray()));

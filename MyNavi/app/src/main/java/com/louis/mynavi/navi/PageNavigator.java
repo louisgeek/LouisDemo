@@ -9,30 +9,33 @@ import com.louis.mynavi.R;
 import java.util.List;
 
 public class PageNavigator {
+    private static volatile PageNavigator instance;
+
+    private PageNavigator() {
+    }
+
+    // 获取单例实例的方法
+    public static PageNavigator getInstance() {
+        if (instance == null) {
+            synchronized (PageNavigator.class) {
+                if (instance == null) {
+                    instance = new PageNavigator();
+                }
+            }
+        }
+        return instance;
+    }
 
     private NavManager mNavManager;
     private PageNodeManager mPageNodeManager;
 
     private PageNode mCurrentNode; // 记录当前节点
 
-    private PageNavigator() {
-    }
-
-    private static PageNavigator instance;
-
-    public static synchronized PageNavigator getInstance() {
-        if (instance == null) {
-            instance = new PageNavigator();
-        }
-        return instance;
-    }
-
     public void init(NavManager navManager) {
         this.mNavManager = navManager;
         mPageNodeManager = new PageNodeManager();
 
     }
-
 
     public void addPageNodes(PageNode... pageNodes) {
         mPageNodeManager.addPageNodes(pageNodes);
