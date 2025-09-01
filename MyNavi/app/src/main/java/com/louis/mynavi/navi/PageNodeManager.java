@@ -31,7 +31,6 @@ public class PageNodeManager {
         }
     }
 
-
     //添加边（跳转关系）
     public void addEdge(String from, String to) {
 //        if (!pageNodeMap.containsKey(from) || !pageNodeMap.containsKey(to)) {
@@ -210,7 +209,6 @@ public class PageNodeManager {
         return result;
     }
 
-
     private boolean hasCycle() {
         // 节点访问状态：0=未访问，1=正在访问，2=已访问
         Map<PageNode, Integer> visited = new HashMap<>();
@@ -248,15 +246,31 @@ public class PageNodeManager {
         return false;
     }
 
-    //    public String getStartNode() {
-//        List<String> sortedNodes = topologicalSort();
-//        for (String node : sortedNodes) {
-//            if (!completedNodes.contains(node) && node.isAvailable()) {
-//                return node;
-//            }
-//        }
-//        return null; // 无可用节点（所有节点已完成或不可用）
-//    }
+
+    public PageNode getStartNode() {
+        List<PageNode> sortedNodes = topologicalSort();
+        if (sortedNodes.isEmpty()) {
+            return null; // 无可用节点（所有节点已完成或不可用）
+        }
+        for (PageNode node : sortedNodes) {
+            // 检查节点自身条件
+            if (node.condition.isSatisfied()) {
+                return node;
+            }
+
+            // 检查所有依赖节点的条件
+            for (PageNode dependency : node.dependencies) {
+                if (!dependency.condition.isSatisfied()) {
+                    // 找到第一个不满足条件的依赖节点
+                    return dependency;
+                }
+            }
+        }
+
+        // 如果所有节点条件都满足，返回最后一个节点（终点）
+        return sortedNodes.get(sortedNodes.size() - 1);
+    }
+
 
     public void printDAG() {
         for (PageNode node : pageNodeMap.values()) {

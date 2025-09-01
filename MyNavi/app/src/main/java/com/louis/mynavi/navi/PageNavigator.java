@@ -1,6 +1,10 @@
 package com.louis.mynavi.navi;
 
-import java.util.List;
+import android.util.Log;
+
+import androidx.fragment.app.Fragment;
+
+import com.louis.mynavi.R;
 
 public class PageNavigator {
     private NavManager mNavManager;
@@ -20,10 +24,22 @@ public class PageNavigator {
 //        mPageNodeManager.addEdge(from, to);
     }
 
-    public void navigateTo(String targetFragmentTag) {
+    private static final String TAG = "PageNavigator";
+
+    public void navigateTo() {
 //        List<PageNode> order = mPageNodeManager.topologicalSortOne();
 //        List<PageNode> order = mPageNodeManager.topologicalSortTwo();
-        List<PageNode> order = mPageNodeManager.topologicalSort();
+        PageNode pageNode = mPageNodeManager.getStartNode();
+        Log.e(TAG, "navigateTo: " + pageNode);
+        if (pageNode != null) {
+            Fragment targetFragment = null;
+            try {
+                targetFragment = pageNode.fragmentClass.newInstance(); //类反射
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
+        }
 //        List<PageNode> order = mPageNodeManager.topologicalSort();
 //        List<String> order = mPageNodeManager.topologicalSort();
 //        for (String fragmentTag : order) {
