@@ -1,9 +1,5 @@
 package com.louis.mynavi.navi;
 
-import androidx.fragment.app.Fragment;
-
-import com.louis.mynavi.R;
-
 import java.util.List;
 
 public class PageNavigator {
@@ -25,23 +21,24 @@ public class PageNavigator {
     }
 
     public void navigateTo(String targetFragmentTag) {
-        List<String> order = mPageNodeManager.topologicalSort();
-        for (String fragmentTag : order) {
-            if (fragmentTag.equals(targetFragmentTag)) {
-                Fragment fragment = mNavManager.findFragmentByTag(fragmentTag);
-                if (fragment == null) {
-                    PageNode node = mPageNodeManager.getPageNode(fragmentTag);
-                    Fragment targetFragment = null;
-                    try {
-                        targetFragment = node.fragmentClass.newInstance(); //类反射
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
-                }
-                break;
-            }
-        }
+        List<PageNode> order = mPageNodeManager.topologicalSort();
+//        List<String> order = mPageNodeManager.topologicalSort();
+//        for (String fragmentTag : order) {
+//            if (fragmentTag.equals(targetFragmentTag)) {
+//                Fragment fragment = mNavManager.findFragmentByTag(fragmentTag);
+//                if (fragment == null) {
+//                    PageNode node = mPageNodeManager.getPageNode(fragmentTag);
+//                    Fragment targetFragment = null;
+//                    try {
+//                        targetFragment = node.fragmentClass.newInstance(); //类反射
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                    mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
+//                }
+//                break;
+//            }
+//        }
 
 //        for (FragmentEdge edge : current.outgoingEdges) {
 //            if (edge.condition.test(context)) {

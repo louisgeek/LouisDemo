@@ -1,6 +1,13 @@
 package com.louis.mynavi.navi;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 public class PageNodeManager {
 
@@ -37,130 +44,69 @@ public class PageNodeManager {
         return pageNodeMap.get(fragmentTag);
     }
 
-    public boolean hasCycle() {
-//        return fragmentDAG.hasCycle();
-        List<String> order = topologicalSort();
-        return false;
-    }
 
-    //Kahn 算法实现拓扑排序（跳转顺序）
-    public List<String> topologicalSort() {
-        //创建图
-        Map<String, Integer> inDegree = new HashMap<>();
-        //初始化入度
-        for (String fragmentTag : pageNodeMap.keySet()) {
-            inDegree.put(fragmentTag, 0);
-        }
-        //计算入度（基于 dependencies）
-        for (PageNode node : pageNodeMap.values()) {
-            for (PageNode dep : node.dependencies) {
-                inDegree.put(dep.fragmentTag, inDegree.get(dep.fragmentTag) + 1);
-            }
-        }
-//        for (String node : graph.keySet()) {
-//            for (String neighbor : graph.get(node)) {
-//                inDegree.put(neighbor, inDegree.getOrDefault(neighbor, 0) + 1);
-//            }
-//        }
+    /**
+     * 条件感知的拓扑排序（Kahn 算法） 仅处理入度为 0 且条件满足的节点
+     * Kahn 算法实现拓扑排序（跳转顺序）
+     *
+     * @return 可跳转的节点列表（按顺序）
+     * @throws IllegalStateException 存在循环依赖时抛出
+     */
+    public List<PageNode> topologicalSort() {
+        Map<PageNode, Integer> inDegree = new HashMap<>();
+        Queue<PageNode> queue = new LinkedList<>();
+        // 计算每个节点的入度
+        // 队列用于存储入度为0且满足条件的节点          // 队列用于存储入度为0且满足条件的节点
         //初始队列（入度为 0 且条件满足）
-        Queue<String> queue = new LinkedList<>();
         for (PageNode node : pageNodeMap.values()) {
-//            if (inDegree.get(node.fragmentTag) == 0 && node.condition.isSatisfied()) {
-            if (inDegree.get(node.fragmentTag) == 0) {
-                queue.offer(node.fragmentTag); //入队
+            inDegree.put(node, node.dependencies.size());
+            if (inDegree.get(node) == 0 && node.condition.isSatisfied()) {
+                queue.offer(node); //入队
             }
         }
         //拓扑排序  遍历队列，生成拓扑序列
-        List<String> result = new ArrayList<>();
+        List<PageNode> result = new ArrayList<>();
         while (!queue.isEmpty()) {
-            String current = queue.poll();
+            PageNode current = queue.poll();
             result.add(current);
-            PageNode currentNode = pageNodeMap.get(current);
-            if (currentNode == null) {
-                continue;
-            }
-
-            //减少依赖当前节点的其他节点的入度               // 更新依赖此节点的其他节点的入度
-            for (PageNode node : currentNode.dependencies) {
-                //减少入度
-                int newDegree = inDegree.get(node.fragmentTag) - 1;
-                inDegree.put(node.fragmentTag, newDegree);
-                //入度为 0 则入队
-//                if (newDegree == 0 && node.condition.isSatisfied()) {
-                if (newDegree == 0) {
-                    queue.offer(node.fragmentTag);
+            // 处理当前节点的所有邻居    //减少依赖当前节点的其他节点的入度               // 更新依赖此节点的其他节点的入度       // 遍历当前节点的所有依赖节点
+            for (PageNode node : pageNodeMap.values()) {
+                if (node.dependencies.contains(current)) {
+                    inDegree.put(node, inDegree.get(node) - 1);
+                    // 如果入度变为0且满足条件，则加入队列
+                    if (inDegree.get(node) == 0 && node.condition.isSatisfied()) {
+                        queue.offer(node);
+                    }
                 }
             }
-
         }
 
         printDAG();
 
-        // 检查是否存在环（拓扑序列长度 < 总节点数）
-        if (result.size() != pageNodeMap.size()) {
-            throw new IllegalStateException("DAG 存在循环依赖！");
+        // 只检查条件满足但未处理的节点
+        boolean hasCycle = false;
+        for (PageNode node : pageNodeMap.values()) {
+//            if (!result.contains(node) && node.condition.isSatisfied() && inDegree.get(node) > 0) {
+            if (!result.contains(node) && inDegree.get(node) > 0) {
+//                判断剩余未处理节点且满足条件的，是否还有入度大于0
+                hasCycle = true;
+                break;
+            }
+        }
+
+        if (hasCycle) {
+            throw new IllegalStateException("检测到循环依赖");
         }
 
         return result;
     }
 
-    public List<String> topologicalSort3() {
 
-        // 计算每个节点的入度
-        Map<String, Integer> inDegree = new HashMap<>();
-        for (String fragmentTag : pageNodeMap.keySet()) {
-            inDegree.put(fragmentTag, 0);
-        }
 
-        // 遍历所有节点，计算每个节点的入度
-        for (PageNode node : pageNodeMap.values()) {
-            for (PageNode dep : node.dependencies) {
-                inDegree.put(dep.fragmentTag, inDegree.get(dep.fragmentTag) + 1);
-            }
-        }
-
-        // 将所有入度为0的节点加入队列
-        Queue<String> queue = new LinkedList<>();
-//        for (Map.Entry<String, Integer> entry : inDegree.entrySet()) {
-//            if (entry.getValue() == 0 && entry.getValue().condition.isSatisfied()) {
-//                queue.offer(entry.getKey());
-//            }
-//        }
-        for (PageNode node : pageNodeMap.values()) {
-            if (inDegree.get(node.fragmentTag) == 0 && node.condition.isSatisfied()) {
-                queue.offer(node.fragmentTag); //入队
-            }
-        }
-
-        List<String> result = new ArrayList<>();
-
-        // 处理队列中的节点
-        while (!queue.isEmpty()) {
-            String current = queue.poll();
-            result.add(current);
-
-            // 获取当前节点
-            PageNode currentNode = getPageNode(current);
-            if (currentNode == null) continue;
-
-            // 遍历当前节点的所有依赖节点
-            for (PageNode node : currentNode.dependencies) {
-                // 减少依赖节点的入度
-                inDegree.put(node.fragmentTag, inDegree.get(node.fragmentTag) - 1);
-                // 如果依赖节点的入度变为0，则加入队列
-                if (inDegree.get(node.fragmentTag) == 0 && node.condition.isSatisfied()) {
-                    queue.offer(node.fragmentTag);
-                }
-            }
-        }
-
-        printDAG();
-
-        // 检查是否存在环（拓扑序列长度 < 总节点数）
-        if (result.size() != pageNodeMap.size()) {
-            throw new IllegalStateException("DAG 存在循环依赖！");
-        }
-        return result;
+    public boolean hasCycle() {
+//        return fragmentDAG.hasCycle();
+//        List<String> order = topologicalSort();
+        return false;
     }
 
     //    public String getStartNode() {

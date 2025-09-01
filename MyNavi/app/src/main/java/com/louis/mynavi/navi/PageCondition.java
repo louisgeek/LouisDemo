@@ -1,5 +1,6 @@
 package com.louis.mynavi.navi;
 
+@FunctionalInterface
 public interface PageCondition {
     /**
      * 校验条件是否满足
