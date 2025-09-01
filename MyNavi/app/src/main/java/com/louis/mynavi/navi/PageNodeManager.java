@@ -129,6 +129,7 @@ public class PageNodeManager {
 
     /**
      * 检测结构性循环依赖（忽略条件）
+     * 几乎相同的Kahn算法实现
      */
     private boolean hasCycleByKahn() {
         Map<PageNode, Integer> inDegree = new HashMap<>();
@@ -142,10 +143,10 @@ public class PageNodeManager {
             }
         }
 
-        int processedCount = 0;
+        List<PageNode> result = new ArrayList<>();
         while (!queue.isEmpty()) {
             PageNode current = queue.poll();
-            processedCount++;
+            result.add(current);
 
             for (PageNode node : pageNodeMap.values()) {
                 if (node.dependencies.contains(current)) {
@@ -156,8 +157,11 @@ public class PageNodeManager {
                 }
             }
         }
-
-        return processedCount != pageNodeMap.size();
+        boolean hasCycle = false;
+        if (result.size() != pageNodeMap.size()) {
+            hasCycle = true;
+        }
+        return hasCycle;
     }
 
     /**
