@@ -44,23 +44,22 @@ public class DagManager {
     }
 
     /**
-     * 条件感知的拓扑排序（Kahn 算法）
-     * 仅处理入度为 0 且条件满足的节点
+     * 优化的拓扑排序（Kahn 算法），仅抛出真实循环依赖异常
      *
-     * @return 可跳转的节点列表（按顺序）
-     * @throws IllegalStateException 存在循环依赖时抛出
+     * @return 可处理的节点列表（按顺序）
+     * @throws IllegalStateException 仅当存在真实循环依赖时抛出
      */
     public List<DagNode> topologicalSort() {
-        Map<DagNode, Integer> inDegree = new HashMap<>(); // 节点入度（未被完成的前置节点数）
-        Queue<DagNode> queue = new LinkedList<>();         // 待处理队列（入度 0 + 条件满足）
+        Map<DagNode, Integer> inDegree = new HashMap<>(); // 仅统计未完成的依赖导致的入度
+        Queue<DagNode> queue = new LinkedList<>();
         List<DagNode> sortedNodes = new ArrayList<>();
 
-        // 初始化所有节点入度为 0
+        // 初始化入度：所有节点初始入度为 0
         for (DagNode node : nodes.values()) {
             inDegree.put(node, 0);
         }
 
-        // 计算实际入度（仅统计未完成的依赖节点）
+        // 计算初始入度（仅统计未完成的依赖）
         for (DagNode node : nodes.values()) {
             for (DagNode dep : node.getDependencies()) {
                 if (!dep.isCompleted()) {
@@ -69,43 +68,59 @@ public class DagManager {
             }
         }
 
-        // 初始队列：入度为 0 且条件满足的节点
+        // 初始队列：入度为 0 的节点（无论条件是否满足）
         for (DagNode node : nodes.values()) {
-            if (inDegree.get(node) == 0 && node.isAvailable()) {
+            if (inDegree.get(node) == 0) {
                 queue.offer(node);
             }
         }
 
-        // 处理队列生成拓扑序列
+        // 处理队列
         while (!queue.isEmpty()) {
             DagNode current = queue.poll();
-            sortedNodes.add(current);
 
-            // 更新下游节点的入度
-            for (DagNode node : nodes.values()) {
-                if (node.getDependencies().contains(current)) {
-                    inDegree.put(node, inDegree.get(node) - 1);
-                    // 若入度变为 0 且条件满足，加入队列
-                    if (inDegree.get(node) == 0 && node.isAvailable()) {
-                        queue.offer(node);
+            // 仅当节点可用（条件满足）时，才加入结果列表并更新下游
+            if (current.isAvailable()) {
+                sortedNodes.add(current);
+
+                // 更新下游节点的入度
+                for (DagNode node : nodes.values()) {
+                    if (node.getDependencies().contains(current)) {
+                        inDegree.put(node, inDegree.get(node) - 1);
+                        if (inDegree.get(node) == 0) {
+                            queue.offer(node);
+                        }
                     }
                 }
+            } else {
+                // 条件不满足的节点：保留在队列外，不处理但允许后续重新检查
+                queue.offer(current); // 重新入队，等待条件满足
             }
         }
 
-        // 检测循环依赖（拓扑序列长度 ≠ 总节点数）
+//        // 检测循环依赖（拓扑序列长度 ≠ 总节点数）
         if (sortedNodes.size() != nodes.size()) {
             throw new IllegalStateException("DAG 存在循环依赖！");
         }
 
+        //检测真实循环依赖：存在未被处理且入度 > 0 的节点
+//        for (DagNode node : nodes.values()) {
+//            if (!sortedNodes.contains(node) && inDegree.get(node) > 0) {
+//                throw new IllegalStateException("DAG 存在循环依赖！");
+//            }
+//        }
+
+        // 检查是否有环：对于满足条件的节点，如果存在入度不为0的，说明有环
+//        for (T node : satisfiedNodes) {
+//            if (inDegree.get(node) > 0) {
+//                throw new IllegalArgumentException("图中存在环，无法进行拓扑排序");
+//            }
+//        }
+
+
         return sortedNodes;
     }
 
-    /**
-     * 获取当前可立即跳转的节点（拓扑排序中第一个未完成且可用的节点）
-     *
-     * @return 可跳转的节点；无可用节点返回 null
-     */
     public DagNode getCurrentAvailableNode() {
         List<DagNode> sortedNodes = topologicalSort();
         for (DagNode node : sortedNodes) {
@@ -113,15 +128,9 @@ public class DagManager {
                 return node;
             }
         }
-        return null; // 所有节点已完成或不可用
+        return null;
     }
 
-    /**
-     * 跳转到指定节点对应的 Fragment
-     *
-     * @param fragmentManager FragmentManager 实例
-     * @param node            目标节点
-     */
     public void navigateTo(FragmentManager fragmentManager, DagNode node) {
 //        if (node == null) return;
 //
@@ -141,11 +150,6 @@ public class DagManager {
 //        }
     }
 
-    /**
-     * 标记节点为已完成（用户完成当前页面操作后调用）
-     *
-     * @param nodeId 节点 ID
-     */
     public void markNodeCompleted(String nodeId) {
         DagNode node = nodes.get(nodeId);
         if (node != null) {
@@ -154,11 +158,6 @@ public class DagManager {
         }
     }
 
-    /**
-     * 检查是否存在循环依赖（调试用）
-     *
-     * @return true：存在循环；false：无循环
-     */
     public boolean hasCycle() {
         try {
             topologicalSort();
