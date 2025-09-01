@@ -21,7 +21,10 @@ public class PageNavigator {
     }
 
     public void navigateTo(String targetFragmentTag) {
+//        List<PageNode> order = mPageNodeManager.topologicalSortOne();
+//        List<PageNode> order = mPageNodeManager.topologicalSortTwo();
         List<PageNode> order = mPageNodeManager.topologicalSort();
+//        List<PageNode> order = mPageNodeManager.topologicalSort();
 //        List<String> order = mPageNodeManager.topologicalSort();
 //        for (String fragmentTag : order) {
 //            if (fragmentTag.equals(targetFragmentTag)) {
