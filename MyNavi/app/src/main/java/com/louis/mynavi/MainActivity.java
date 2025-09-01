@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 //        startNavigation();
         // 4. 执行导航（会自动跳过未满足条件的Fragment）
 //        mPageNavigator.navigateTo("Home"); // 实际路径：privacyNode -> loginNode（按照条件满足实际处理 可能Home不会加载）
-        PageNavigator.getInstance().navigateToNext();
+        PageNavigator.getInstance().navigateToNext2();
     }
 
     private void startNavigation() {

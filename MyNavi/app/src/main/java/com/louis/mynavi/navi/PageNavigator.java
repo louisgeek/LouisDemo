@@ -6,13 +6,19 @@ import androidx.fragment.app.Fragment;
 
 import com.louis.mynavi.R;
 
+import java.util.List;
+
 public class PageNavigator {
-    private static PageNavigator instance;
+
     private NavManager mNavManager;
     private PageNodeManager mPageNodeManager;
 
+    private PageNode mCurrentNode; // 记录当前节点
+
     private PageNavigator() {
     }
+
+    private static PageNavigator instance;
 
     public static synchronized PageNavigator getInstance() {
         if (instance == null) {
@@ -39,7 +45,75 @@ public class PageNavigator {
 
     private static final String TAG = "PageNavigator";
 
+
+//    private void navigateTo(PageNode node) {
+//        // 检查条件是否满足（可选）
+//        if (!node.condition.isSatisfied()) {
+//            navigateToNext(); // 跳过当前节点，直接下一个
+//            return;
+//        }
+//
+//        // 反射创建 Fragment
+//        Fragment targetFragment = null;
+//        try {
+//            targetFragment = node.getFragmentClass().newInstance();
+//            Log.e(TAG, "navigateToNode: 创建 Fragment 成功，类=" + node.getFragmentClass().getName());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.e(TAG, "navigateToNode: 创建 Fragment 失败，跳过");
+//            navigateToNextNode(); // 创建失败，跳过当前节点
+//            return;
+//        }
+//
+//    }
+
     public void navigateToNext() {
+        // 1. 获取当前节点（首次使用起始节点）
+        if (mCurrentNode == null) {
+            mCurrentNode = mPageNodeManager.getStartNode();
+        }
+
+        Log.e(TAG, "navigateToNext: Current node=" + mCurrentNode);
+
+        if (mCurrentNode != null) {
+            // 2. 获取所有可能的下一个节点
+            List<PageNode> nextNodes = mPageNodeManager.getNextNodes(mCurrentNode);
+
+            // 3. 查找第一个满足条件的节点
+            PageNode targetNode = null;
+            for (PageNode node : nextNodes) {
+                if (node.condition.isSatisfied()) {
+                    targetNode = node;
+                    break;
+                }
+            }
+
+            // 4. 如果找到满足条件的节点则跳转
+            if (targetNode != null) {
+                Fragment targetFragment = null;
+                try {
+                    targetFragment = targetNode.fragmentClass.newInstance();
+                    Log.e(TAG, "navigateToNext: Target fragment=" + targetFragment);
+
+                    // 执行跳转
+                    mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
+
+                    // 更新当前节点
+                    mCurrentNode = targetNode;
+
+                    // 5. 递归检查是否需要继续跳转下一页
+                    navigateToNext(); // 自动继续跳转
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Fragment instantiation failed", e);
+                }
+            } else {
+                Log.e(TAG, "No next node with satisfied condition");
+            }
+        }
+    }
+
+    public void navigateToNext2() {
 //        List<PageNode> order = mPageNodeManager.topologicalSortOne();
 //        List<PageNode> order = mPageNodeManager.topologicalSortTwo();
         PageNode pageNode = mPageNodeManager.getStartNode();
@@ -100,5 +174,35 @@ public class PageNavigator {
 //                break;
 //            }
 //        }
+    }
+
+    public void navigateTo(Class<? extends Fragment> fragmentClass) {
+        try {
+            Fragment targetFragment = fragmentClass.newInstance();
+            Log.e(TAG, "navigateTo: " + fragmentClass.getSimpleName());
+            mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
+        } catch (Exception e) {
+            Log.e(TAG, "navigateTo error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void autoNavigate() {
+        try {
+            List<PageNode> order = mPageNodeManager.topologicalSort();
+            Log.e(TAG, "autoNavigate: available nodes=" + order.size());
+
+            if (!order.isEmpty()) {
+                PageNode nextNode = order.get(0);
+                Fragment targetFragment = nextNode.fragmentClass.newInstance();
+                Log.e(TAG, "autoNavigate: " + nextNode.fragmentClass.getSimpleName());
+                mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
+            } else {
+                Log.e(TAG, "autoNavigate: no available nodes");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "autoNavigate error: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

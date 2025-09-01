@@ -12,7 +12,7 @@ import java.util.Queue;
 import java.util.Set;
 
 public class DagManager {
-    private final Map<String, DagNode> nodes = new HashMap<>();      // 节点 ID → 节点
+    public final Map<String, DagNode> nodes = new HashMap<>();      // 节点 ID → 节点
     private final Set<DagNode> completedNodes = new HashSet<>();     // 已完成的节点
 
     /**
@@ -98,24 +98,14 @@ public class DagManager {
             }
         }
 
-//        // 检测循环依赖（拓扑序列长度 ≠ 总节点数）
-        if (sortedNodes.size() != nodes.size()) {
-            throw new IllegalStateException("DAG 存在循环依赖！");
-        }
+
 
         //检测真实循环依赖：存在未被处理且入度 > 0 的节点
-//        for (DagNode node : nodes.values()) {
-//            if (!sortedNodes.contains(node) && inDegree.get(node) > 0) {
-//                throw new IllegalStateException("DAG 存在循环依赖！");
-//            }
-//        }
-
-        // 检查是否有环：对于满足条件的节点，如果存在入度不为0的，说明有环
-//        for (T node : satisfiedNodes) {
-//            if (inDegree.get(node) > 0) {
-//                throw new IllegalArgumentException("图中存在环，无法进行拓扑排序");
-//            }
-//        }
+        for (DagNode node : nodes.values()) {
+            if (!sortedNodes.contains(node) && inDegree.get(node) > 0) {
+                throw new IllegalStateException("DAG 存在循环依赖！");
+            }
+        }
 
 
         return sortedNodes;
