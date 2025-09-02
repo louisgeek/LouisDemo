@@ -1,4 +1,4 @@
-package com.louis.mynavi.navi;
+package com.louis.mynavi.nav;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -18,64 +18,67 @@ import com.louis.mynavi.user.ui.login.LoginFragment;
 /**
  * 应用流程管理器，使用DAG管理应用的导航流程
  */
-public class FlowManager {
+public class NavManager {
 
-    private static volatile FlowManager instance;
 
-    private FlowManager(Context context) {
-        initializeDag(context);
+    private static volatile NavManager instance;
+
+    private NavManager() {
+
     }
 
     // 获取单例实例的方法
-    public static FlowManager getInstance(Context context) {
+    public static NavManager getInstance() {
         if (instance == null) {
-            synchronized (FlowManager.class) {
+            synchronized (NavManager.class) {
                 if (instance == null) {
-                    instance = new FlowManager(context.getApplicationContext());
+                    instance = new NavManager();
                 }
             }
         }
         return instance;
     }
 
+
     public boolean splashCompleted = false;
 
     public boolean agreementCompleted = false;
 
-    private final DagManager dagManager = new DagManager();
-    private static final String TAG = "FlowManager";
 
-    private void initializeDag(Context context) {
+    private NavNodeManager navNodeManager01;
+    private NavNodeManager navNodeManager02;
 
-        DagNode splashNode = new DagNode(SplashFragment.class, () -> splashCompleted);//无条件
+    public void init(Context context) {
+        navNodeManager01 = new NavNodeManager();
 
-        DagNode privacyNode = new DagNode(AgreementFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(context)
+        NavNode splashNode = new NavNode(SplashFragment.class, () -> splashCompleted);//无条件
+
+        NavNode privacyNode = new NavNode(AgreementFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean("isAgreed", false) || agreementCompleted); //条件：未同意隐私协议
         privacyNode.addDependency(splashNode); //
 
-        DagNode loginNode = new DagNode(LoginFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(context)
+        NavNode loginNode = new NavNode(LoginFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean("isLogin", false)); //条件：同意隐私协议且未登录
         loginNode.addDependency(privacyNode); //登录页 依赖 隐私协议页
 
-        DagNode homeNode = new DagNode(HomeFragment.class); //条件：同意隐私协议且已登录
+        NavNode homeNode = new NavNode(HomeFragment.class); //条件：同意隐私协议且已登录
         homeNode.addDependency(loginNode); //主页页 依赖 登录页
 
-        dagManager.addNode(splashNode);
-        dagManager.addNode(privacyNode);
-        dagManager.addNode(loginNode);
-        dagManager.addNode(homeNode);
+        navNodeManager01.addNode(splashNode);
+        navNodeManager01.addNode(privacyNode);
+        navNodeManager01.addNode(loginNode);
+        navNodeManager01.addNode(homeNode);
 
-        Log.d("dagManager", dagManager.printDag());
+        Log.d("dagManager", navNodeManager01.printDag());
     }
 
-    // 获取当前应该显示的流程步骤
-    public DagNode getCurrentStep() {
-        return dagManager.getStartNode();
+    public NavNodeManager getNavNodeManager01() {
+        return navNodeManager01;
     }
 
     // 检查是否可以跳转到指定步骤
-    public boolean canNavigateTo(String step) {
-        DagNode targetNode = dagManager.getAllNodes().stream()
+    public boolean canNavigateTo(String step, NavNodeManager navNodeManager) {
+        NavNode targetNode = navNodeManager.getAllNodes().stream()
                 .filter(node -> step.equals(node.getFragmentClass()))
                 .findFirst()
                 .orElse(null);
@@ -85,7 +88,7 @@ public class FlowManager {
         }
 
         // 检查所有依赖是否满足条件
-        for (DagNode dependency : targetNode.getDependencies()) {
+        for (NavNode dependency : targetNode.getDependencies()) {
             if (!dependency.isSatisfied()) {
                 return false;
             }
@@ -96,9 +99,9 @@ public class FlowManager {
 
     // 封装导航到下一步的逻辑
     public boolean navToNext(FragmentManager fragmentManager) {
-        Log.d("dagManager", dagManager.printDag());
+        Log.d("dagManager", navNodeManager01.printDag());
         //
-        DagNode node = dagManager.getStartNode();
+        NavNode node = navNodeManager01.getStartNode();
 //        navController.navigate(route);
         if (node != null) {
             navigateToFragment(fragmentManager, node.getFragmentClass(), null);

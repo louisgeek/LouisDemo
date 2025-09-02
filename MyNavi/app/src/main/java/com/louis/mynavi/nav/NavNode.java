@@ -1,7 +1,9 @@
-package com.louis.mynavi.navi;
+package com.louis.mynavi.nav;
 
 
 import androidx.fragment.app.Fragment;
+
+import com.louis.mynavi.navi.PageCondition;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,19 +15,19 @@ import java.util.Set;
 /**
  * DAG节点，代表流程中的一个步骤或任务
  */
-public class DagNode {
+public class NavNode {
     private final String fragmentTag;
     public Class<? extends Fragment> fragmentClass;
 
-    private final Set<DagNode> dependencies = new HashSet<>();
+    private final Set<NavNode> dependencies = new HashSet<>();
     private PageCondition condition;
 
 
-    public DagNode(Class<? extends Fragment> fragmentClass) {
+    public NavNode(Class<? extends Fragment> fragmentClass) {
         this(fragmentClass, () -> false);
     }
 
-    public DagNode(Class<? extends Fragment> fragmentClass, PageCondition condition) {
+    public NavNode(Class<? extends Fragment> fragmentClass, PageCondition condition) {
         this.fragmentTag = fragmentClass.getSimpleName();
         this.fragmentClass = fragmentClass;
         this.condition = condition;
@@ -39,17 +41,17 @@ public class DagNode {
         return fragmentClass;
     }
 
-    public Set<DagNode> getDependencies() {
+    public Set<NavNode> getDependencies() {
         return dependencies;
     }
 
     // 添加依赖节点
-    public void addDependency(DagNode node) {
+    public void addDependency(NavNode node) {
         dependencies.add(node);
     }
 
     // 添加多个依赖节点
-    public void addDependency(DagNode... nodes) {
+    public void addDependency(NavNode... nodes) {
         Collections.addAll(dependencies, nodes);
     }
 
@@ -59,7 +61,7 @@ public class DagNode {
         if (condition != null && !condition.isSatisfied()) {
             return false;
         }
-        for (DagNode dependency : dependencies) {
+        for (NavNode dependency : dependencies) {
             if (!dependency.isSatisfied()) {
                 return false;
             }
@@ -68,13 +70,13 @@ public class DagNode {
     }
 
     // 检查是否依赖于指定节点
-    public boolean isDependentOn(DagNode node) {
+    public boolean isDependentOn(NavNode node) {
         if (dependencies.contains(node)) {
             return true;
         }
 
         // 递归检查间接依赖
-        for (DagNode dependency : dependencies) {
+        for (NavNode dependency : dependencies) {
             if (dependency.isDependentOn(node)) {
                 return true;
             }
@@ -111,7 +113,7 @@ public class DagNode {
         builder.append(conditionStatus).append("\n");
 
         // 递归打印所有依赖
-        List<DagNode> dependencyList = new ArrayList<>(dependencies);
+        List<NavNode> dependencyList = new ArrayList<>(dependencies);
         for (int i = 0; i < dependencyList.size(); i++) {
             boolean isLastDependency = i == dependencyList.size() - 1;
             builder.append(dependencyList.get(i).printDependencyTree(childIndent, isLastDependency, new HashSet<>(visited)));

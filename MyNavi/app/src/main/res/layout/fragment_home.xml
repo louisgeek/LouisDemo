@@ -31,10 +31,10 @@
         android:text="Device Add" />
 
     <Button
-        android:id="@+id/btn_profile"
+        android:id="@+id/btnLogout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Profile →" />
+        android:text="Logout" />
 
 
     <Button

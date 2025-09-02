@@ -41,14 +41,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupNavigation4() {
-        com.louis.mynavi.navi.DagNode startNode = FlowManager.getInstance(this).getCurrentStep();
+        NavManager.getInstance().init(this);
+        NavNodeManager navNodeManager01 = NavManager.getInstance().getNavNodeManager01();
+        NavNode startNode = navNodeManager01.getStartNode();
         Log.e(TAG, "setupNavigation4: startNode=" + startNode.getFragmentTag());
         if (startNode != null) {
-            FlowManager.getInstance(this).navigateToFragment(getSupportFragmentManager(), startNode.getFragmentClass(), null);
+            NavManager.getInstance().navigateToFragment(getSupportFragmentManager(), startNode.getFragmentClass(), null);
         } else {
-            FlowManager.getInstance(this).navigateToFragment(getSupportFragmentManager(), HomeFragment.class, null);
+            NavManager.getInstance().navigateToFragment(getSupportFragmentManager(), HomeFragment.class, null);
         }
-        PageNavigator.getInstance().isSSSS = true;
     }
 
     public void setupNavigation3() {
@@ -149,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void testPage() {
-        NavManager navManager = new NavManager(getSupportFragmentManager());
+        com.louis.mynavi.navi.NavManager navManager = new com.louis.mynavi.navi.NavManager(getSupportFragmentManager());
         PageNavigator.getInstance().init(navManager);
 
         //回退逻辑 Home→Setting、Mine→Setting   从Home进则回Home，从Mine进则回Mine

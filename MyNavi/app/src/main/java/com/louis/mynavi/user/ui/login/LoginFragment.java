@@ -41,7 +41,7 @@ public class LoginFragment extends Fragment {
                     .edit().putBoolean("isLogin", true).apply();
 //            PageNavigator.getInstance().isLogined = true;
 //            PageNavigator.getInstance().navigateToNext(true);
-            FlowManager.getInstance(requireContext()).navToNext(getParentFragmentManager());
+            NavManager.getInstance().navToNext(getParentFragmentManager());
         });
     }
 

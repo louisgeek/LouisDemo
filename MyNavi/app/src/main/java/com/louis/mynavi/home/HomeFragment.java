@@ -33,7 +33,11 @@ public class HomeFragment extends Fragment {
         binding.btnBack.setOnClickListener(v -> {
             PageNavigator.getInstance().navigateBack();
         });
-
+        binding.btnLogout.setOnClickListener(v -> {
+            PreferenceManager.getDefaultSharedPreferences(requireContext())
+                    .edit().putBoolean("isLogin", false).apply();
+            NavManager.getInstance().navToNext(getParentFragmentManager());
+        });
     }
 
     @Override
