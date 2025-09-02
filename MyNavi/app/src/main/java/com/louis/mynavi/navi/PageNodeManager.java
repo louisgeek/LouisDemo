@@ -198,7 +198,6 @@ public class PageNodeManager {
         }
 
         for (PageNode node : pageNodeMap.values()) {
-            inDegree.put(node, node.dependencies.size());
             if (inDegree.get(node) == 0 && node.condition.isSatisfied()) {
                 queue.offer(node); //入队
             }
