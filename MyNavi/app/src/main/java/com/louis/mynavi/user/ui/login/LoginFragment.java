@@ -8,10 +8,11 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 
 import com.louis.mynavi.databinding.FragmentLoginBinding;
+import com.louis.mynavi.navi.FlowManager;
 import com.louis.mynavi.navi.PageNavigator;
-import com.louis.mynavi.node.PageNodeManager3;
 
 public class LoginFragment extends Fragment {
 
@@ -36,11 +37,11 @@ public class LoginFragment extends Fragment {
         });
         binding.btnNext.setOnClickListener(v -> {
             // 模拟登录成功
-//            PreferenceManager.getDefaultSharedPreferences(requireContext())
-//                    .edit().putBoolean("isLoggedIn1", true).apply();
-            PageNavigator.getInstance().isLogined = true;
+            PreferenceManager.getDefaultSharedPreferences(requireContext())
+                    .edit().putBoolean("isLogin", true).apply();
+//            PageNavigator.getInstance().isLogined = true;
 //            PageNavigator.getInstance().navigateToNext(true);
-            PageNodeManager3.getInstance().navigateToNext(getParentFragmentManager());
+            FlowManager.getInstance(requireContext()).navToNext(getParentFragmentManager());
         });
     }
 

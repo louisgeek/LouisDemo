@@ -9,6 +9,7 @@ import androidx.preference.PreferenceManager;
 import com.louis.mynavi.dag.DagManager;
 import com.louis.mynavi.dag.DagNode;
 import com.louis.mynavi.home.HomeFragment;
+import com.louis.mynavi.navi.FlowManager;
 import com.louis.mynavi.navi.NavManager;
 import com.louis.mynavi.navi.PageCondition;
 import com.louis.mynavi.navi.PageNavigator;
@@ -35,12 +36,19 @@ public class MainActivity extends AppCompatActivity {
 
 //        testPage();
 //        testDag();
-        setupNavigation3();
+//        setupNavigation3();
+        setupNavigation4();
     }
 
-    private boolean isLoggedIn() {
-        // 检查登录状态
-        return false;
+    private void setupNavigation4() {
+        com.louis.mynavi.navi.DagNode startNode = FlowManager.getInstance(this).getCurrentStep();
+        Log.e(TAG, "setupNavigation4: startNode=" + startNode.getFragmentTag());
+        if (startNode != null) {
+            FlowManager.getInstance(this).navigateToFragment(getSupportFragmentManager(), startNode.getFragmentClass(), null);
+        } else {
+            FlowManager.getInstance(this).navigateToFragment(getSupportFragmentManager(), HomeFragment.class, null);
+        }
+        PageNavigator.getInstance().isSSSS = true;
     }
 
     public void setupNavigation3() {

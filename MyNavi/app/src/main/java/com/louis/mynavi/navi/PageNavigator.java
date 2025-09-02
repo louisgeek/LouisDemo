@@ -49,6 +49,7 @@ public class PageNavigator {
     private static final String TAG = "PageNavigator";
 
     public boolean isLogined = false;
+    public boolean isSSSS = false;
 
     public void navigateBack() {
         mNavManager.goBack();

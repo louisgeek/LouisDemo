@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.louis.mynavi.databinding.FragmentSplashBinding;
-import com.louis.mynavi.node.PageNodeManager3;
+import com.louis.mynavi.navi.FlowManager;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -72,9 +72,11 @@ public class SplashFragment extends Fragment {
         binding.btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                FlowManager.getInstance(requireContext()).splashCompleted = true;
 //                PageNavigator.getInstance().markNodeCompleted("SplashFragment");
 //                PageNavigator.getInstance().navigateToNext(true);
-                PageNodeManager3.getInstance().navigateToNext(getParentFragmentManager());
+
+                FlowManager.getInstance(requireContext()).navToNext(getParentFragmentManager());
             }
         });
     }

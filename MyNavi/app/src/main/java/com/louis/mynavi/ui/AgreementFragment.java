@@ -11,8 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
 import com.louis.mynavi.databinding.FragmentAgreementBinding;
+import com.louis.mynavi.navi.FlowManager;
 import com.louis.mynavi.navi.PageNavigator;
-import com.louis.mynavi.node.PageNodeManager3;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -79,11 +79,24 @@ public class AgreementFragment extends Fragment {
         binding.btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
 //                PageNavigator.getInstance().markNodeCompleted("AgreementFragment");
 //                PageNavigator.getInstance().navigateToNext(true);
-                PreferenceManager.getDefaultSharedPreferences(binding.getRoot().getContext()).edit().putBoolean(("isAgreed678"), true).apply();
+                PreferenceManager.getDefaultSharedPreferences(binding.getRoot().getContext()).edit().putBoolean(("isAgreed"), true).apply();
 //                PageNavigator.getInstance().navigateToNext(true);
-                PageNodeManager3.getInstance().navigateToNext(getParentFragmentManager());
+                FlowManager.getInstance(requireContext()).navToNext(getParentFragmentManager());
+            }
+        });
+
+        binding.btnSkip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+//                PageNavigator.getInstance().markNodeCompleted("AgreementFragment");
+//                PageNavigator.getInstance().navigateToNext(true);
+                FlowManager.getInstance(requireContext()).agreementCompleted = true;
+//                PageNavigator.getInstance().navigateToNext(true);
+                FlowManager.getInstance(requireContext()).navToNext(getParentFragmentManager());
             }
         });
     }
