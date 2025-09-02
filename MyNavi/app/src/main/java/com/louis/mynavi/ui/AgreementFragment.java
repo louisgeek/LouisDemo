@@ -26,6 +26,8 @@ public class AgreementFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private FragmentAgreementBinding binding;
+
     public AgreementFragment() {
         // Required empty public constructor
     }
@@ -60,7 +62,27 @@ public class AgreementFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_agreement, container, false);
+        binding = FragmentAgreementBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        binding.btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                PageNavigator.getInstance().markNodeCompleted("AgreementFragment");
+//                PageNavigator.getInstance().navigateToNext(true);
+                PreferenceManager.getDefaultSharedPreferences(binding.getRoot().getContext()).edit().putBoolean(("isAgreed6"), true).apply();
+                PageNavigator.getInstance().navigateToNext(true);
+            }
+        });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

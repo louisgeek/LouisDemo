@@ -19,6 +19,7 @@ public class PageNodeManager {
     //导航图（DAG 的“边”）
     //    private Map<String, PageNode> navGraph = new HashMap<>();
     private Map<PageNode, Set<PageNode>> navGraphMap = new HashMap<>();
+    private Set<String> completedNodes = new HashSet<>();
     //添加节点
 
     public void addPageNode(PageNode pageNode) {
@@ -184,6 +185,18 @@ public class PageNodeManager {
         // 计算每个节点的入度
         // 队列用于存储入度为0且满足条件的节点          // 队列用于存储入度为0且满足条件的节点
         //初始队列（入度为 0 且条件满足）
+
+        for (PageNode node : pageNodeMap.values()) {
+            inDegree.put(node, 0);
+        }
+
+        // 计算入度：遍历所有依赖关系
+        for (PageNode node : pageNodeMap.values()) {
+            for (PageNode dep : node.dependencies) {
+                inDegree.put(dep, inDegree.get(dep) + 1);
+            }
+        }
+
         for (PageNode node : pageNodeMap.values()) {
             inDegree.put(node, node.dependencies.size());
             if (inDegree.get(node) == 0 && node.condition.isSatisfied()) {
@@ -253,8 +266,7 @@ public class PageNodeManager {
             return null; // 无可用节点（所有节点已完成或不可用）
         }
         for (PageNode node : sortedNodes) {
-            // 检查节点自身条件
-            if (node.condition.isSatisfied()) {
+            if (!isCompleted(node.fragmentTag)) {
                 return node;
             }
 
@@ -271,13 +283,26 @@ public class PageNodeManager {
         return sortedNodes.get(sortedNodes.size() - 1);
     }
 
-    public String getNextPage(String currentPageId) {
-        PageNode nextPages = pageNodeMap.get(currentPageId);
-        if (nextPages.dependencies != null && !nextPages.dependencies.isEmpty()) {
-            return nextPages.dependencies.get(0); // 返回第一个下一个页面
+    // 标记页面为已访问
+    public void markNodeCompleted(String fragmentTag) {
+        if (pageNodeMap.containsKey(fragmentTag)) {
+            completedNodes.add(fragmentTag);
         }
-        return null;
     }
+
+
+    // 检查页面是否已访问
+    public boolean isCompleted(String fragmentTag) {
+        return completedNodes.contains(fragmentTag);
+    }
+//    public String getNextPage(String currentPageId) {
+//        PageNode nextPages = pageNodeMap.get(currentPageId);
+//        if (nextPages.dependencies != null && !nextPages.dependencies.isEmpty()) {
+//            return nextPages.dependencies.get(0); // 返回第一个下一个页面
+//        }
+//        return null;
+//    }
+
     public void printDAG() {
         for (PageNode node : pageNodeMap.values()) {
             System.out.println(node.fragmentTag + " -> " + Arrays.toString(node.dependencies.toArray()));

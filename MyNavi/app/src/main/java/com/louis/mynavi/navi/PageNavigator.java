@@ -70,42 +70,45 @@ public class PageNavigator {
 //
 //    }
 
-    public void navigateToNext() {
+    public void navigateToNext(boolean markNodeCompleted) {
         // 1. 获取当前节点（首次使用起始节点）
-        if (mCurrentNode == null) {
-            mCurrentNode = mPageNodeManager.getStartNode();
-        }
+//        if (mCurrentNode == null) {
+        mCurrentNode = mPageNodeManager.getStartNode();
+//        }
 
         Log.e(TAG, "navigateToNext: Current node=" + mCurrentNode);
 
         if (mCurrentNode != null) {
             // 2. 获取所有可能的下一个节点
-            List<PageNode> nextNodes = mPageNodeManager.getNextNodes(mCurrentNode);
-
-            // 3. 查找第一个满足条件的节点
-            PageNode targetNode = null;
-            for (PageNode node : nextNodes) {
-                if (node.condition.isSatisfied()) {
-                    targetNode = node;
-                    break;
-                }
-            }
+//            List<PageNode> nextNodes = mPageNodeManager.getNextNodes(mCurrentNode);
+//
+//            // 3. 查找第一个满足条件的节点
+//            PageNode targetNode = null;
+//            for (PageNode node : nextNodes) {
+//                if (node.condition.isSatisfied()) {
+//                    targetNode = node;
+//                    break;
+//                }
+//            }
 
             // 4. 如果找到满足条件的节点则跳转
-            if (targetNode != null) {
+            if (mCurrentNode != null) {
                 Fragment targetFragment = null;
                 try {
-                    targetFragment = targetNode.fragmentClass.newInstance();
+                    targetFragment = mCurrentNode.fragmentClass.newInstance();
                     Log.e(TAG, "navigateToNext: Target fragment=" + targetFragment);
 
                     // 执行跳转
                     mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
 
                     // 更新当前节点
-                    mCurrentNode = targetNode;
+//                    mCurrentNode = targetNode;
+                    if (markNodeCompleted) {
+                        mPageNodeManager.markNodeCompleted(mCurrentNode.fragmentTag);
+                    }
 
                     // 5. 递归检查是否需要继续跳转下一页
-                    navigateToNext(); // 自动继续跳转
+//                    navigateToNext(); // 自动继续跳转
 
                 } catch (Exception e) {
                     Log.e(TAG, "Fragment instantiation failed", e);

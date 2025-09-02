@@ -72,7 +72,8 @@ public class SplashFragment extends Fragment {
         binding.btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                PageNavigator.getInstance().navigateToNext2();
+//                PageNavigator.getInstance().markNodeCompleted("SplashFragment");
+                PageNavigator.getInstance().navigateToNext(true);
             }
         });
     }

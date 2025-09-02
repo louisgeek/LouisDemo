@@ -30,6 +30,13 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        binding.btnNext.setOnClickListener(v -> {
+            // 模拟登录成功
+//            PreferenceManager.getDefaultSharedPreferences(requireContext())
+//                    .edit().putBoolean("isLoggedIn1", true).apply();
+
+            PageNavigator.getInstance().navigateToNext(true);
+        });
     }
 
 

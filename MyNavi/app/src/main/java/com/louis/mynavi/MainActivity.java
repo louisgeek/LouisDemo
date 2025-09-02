@@ -84,10 +84,11 @@ public class MainActivity extends AppCompatActivity {
 
 
         PageCondition loginCondition = () -> PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean("isLoggedIn", false);
+                .getBoolean("isLoggedIn1", false);
+
 
         PageCondition agreeCondition = () -> PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean("isAgreed", false);
+                .getBoolean("isAgreed6", false);
 
         PageNode splashNode = new PageNode(SplashFragment.class);//无条件
 
@@ -136,7 +137,10 @@ public class MainActivity extends AppCompatActivity {
 //        startNavigation();
         // 4. 执行导航（会自动跳过未满足条件的Fragment）
 //        mPageNavigator.navigateTo("Home"); // 实际路径：privacyNode -> loginNode（按照条件满足实际处理 可能Home不会加载）
-        PageNavigator.getInstance().navigateToNext2();
+        // 调试：检查所有节点状态
+
+
+        PageNavigator.getInstance().navigateToNext(true);
     }
 
     private void startNavigation() {
