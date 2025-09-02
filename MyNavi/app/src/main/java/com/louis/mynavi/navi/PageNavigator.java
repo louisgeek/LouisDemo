@@ -48,28 +48,11 @@ public class PageNavigator {
 
     private static final String TAG = "PageNavigator";
 
+    public boolean isLogined = false;
 
-//    private void navigateTo(PageNode node) {
-//        // 检查条件是否满足（可选）
-//        if (!node.condition.isSatisfied()) {
-//            navigateToNext(); // 跳过当前节点，直接下一个
-//            return;
-//        }
-//
-//        // 反射创建 Fragment
-//        Fragment targetFragment = null;
-//        try {
-//            targetFragment = node.getFragmentClass().newInstance();
-//            Log.e(TAG, "navigateToNode: 创建 Fragment 成功，类=" + node.getFragmentClass().getName());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            Log.e(TAG, "navigateToNode: 创建 Fragment 失败，跳过");
-//            navigateToNextNode(); // 创建失败，跳过当前节点
-//            return;
-//        }
-//
-//    }
-
+    public void navigateBack() {
+        mNavManager.goBack();
+    }
     public void navigateToNext(boolean markNodeCompleted) {
         // 1. 获取当前节点（首次使用起始节点）
 //        if (mCurrentNode == null) {
@@ -209,6 +192,20 @@ public class PageNavigator {
         } catch (Exception e) {
             Log.e(TAG, "autoNavigate error: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public void startNavigation() {
+        mCurrentNode = mPageNodeManager.getStartNode();
+
+        if (mCurrentNode != null) {
+            try {
+                Fragment targetFragment = mCurrentNode.fragmentClass.newInstance();
+                mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
+                Log.e(TAG, "startNavigation: Started with " + mCurrentNode.fragmentTag);
+            } catch (Exception e) {
+                Log.e(TAG, "startNavigation: Failed", e);
+            }
         }
     }
 }

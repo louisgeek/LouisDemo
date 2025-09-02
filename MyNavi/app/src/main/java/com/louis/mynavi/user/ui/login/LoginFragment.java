@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.louis.mynavi.databinding.FragmentLoginBinding;
+import com.louis.mynavi.navi.PageNavigator;
+import com.louis.mynavi.node.PageNodeManager3;
 
 public class LoginFragment extends Fragment {
 
@@ -29,13 +31,16 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        binding.btnBack.setOnClickListener(v -> {
+            PageNavigator.getInstance().navigateBack();
+        });
         binding.btnNext.setOnClickListener(v -> {
             // 模拟登录成功
 //            PreferenceManager.getDefaultSharedPreferences(requireContext())
 //                    .edit().putBoolean("isLoggedIn1", true).apply();
-
-            PageNavigator.getInstance().navigateToNext(true);
+            PageNavigator.getInstance().isLogined = true;
+//            PageNavigator.getInstance().navigateToNext(true);
+            PageNodeManager3.getInstance().navigateToNext(getParentFragmentManager());
         });
     }
 

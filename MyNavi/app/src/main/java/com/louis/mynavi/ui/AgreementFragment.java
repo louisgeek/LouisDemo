@@ -1,14 +1,18 @@
 package com.louis.mynavi.ui;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.louis.mynavi.R;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
+
+import com.louis.mynavi.databinding.FragmentAgreementBinding;
+import com.louis.mynavi.navi.PageNavigator;
+import com.louis.mynavi.node.PageNodeManager3;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -69,13 +73,17 @@ public class AgreementFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        binding.btnBack.setOnClickListener(v -> {
+            PageNavigator.getInstance().navigateBack();
+        });
         binding.btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 //                PageNavigator.getInstance().markNodeCompleted("AgreementFragment");
 //                PageNavigator.getInstance().navigateToNext(true);
-                PreferenceManager.getDefaultSharedPreferences(binding.getRoot().getContext()).edit().putBoolean(("isAgreed6"), true).apply();
-                PageNavigator.getInstance().navigateToNext(true);
+                PreferenceManager.getDefaultSharedPreferences(binding.getRoot().getContext()).edit().putBoolean(("isAgreed678"), true).apply();
+//                PageNavigator.getInstance().navigateToNext(true);
+                PageNodeManager3.getInstance().navigateToNext(getParentFragmentManager());
             }
         });
     }

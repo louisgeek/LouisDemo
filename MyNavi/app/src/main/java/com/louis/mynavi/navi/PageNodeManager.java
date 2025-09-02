@@ -3,6 +3,7 @@ package com.louis.mynavi.navi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -186,33 +187,32 @@ public class PageNodeManager {
         // 队列用于存储入度为0且满足条件的节点          // 队列用于存储入度为0且满足条件的节点
         //初始队列（入度为 0 且条件满足）
 
+        // 计算入度
         for (PageNode node : pageNodeMap.values()) {
-            inDegree.put(node, 0);
+            inDegree.put(node, node.dependencies.size());
         }
 
-        // 计算入度：遍历所有依赖关系
+        // 将入度为0的节点加入队列
         for (PageNode node : pageNodeMap.values()) {
-            for (PageNode dep : node.dependencies) {
-                inDegree.put(dep, inDegree.get(dep) + 1);
+            if (inDegree.get(node) == 0) {
+                queue.offer(node);
             }
         }
 
-        for (PageNode node : pageNodeMap.values()) {
-            if (inDegree.get(node) == 0 && node.condition.isSatisfied()) {
-                queue.offer(node); //入队
-            }
-        }
-        //拓扑排序  遍历队列，生成拓扑序列
         List<PageNode> result = new ArrayList<>();
         while (!queue.isEmpty()) {
             PageNode current = queue.poll();
-            result.add(current);
-            // 处理当前节点的所有邻居    //减少依赖当前节点的其他节点的入度               // 更新依赖此节点的其他节点的入度       // 遍历当前节点的所有依赖节点
+
+            // 只有条件满足的节点才加入结果
+            if (current.condition.isSatisfied()) {
+                result.add(current);
+            }
+
+            // 处理依赖关系（无论条件是否满足）
             for (PageNode node : pageNodeMap.values()) {
                 if (node.dependencies.contains(current)) {
                     inDegree.put(node, inDegree.get(node) - 1);
-                    // 如果入度变为0且满足条件，则加入队列
-                    if (inDegree.get(node) == 0 && node.condition.isSatisfied()) {
+                    if (inDegree.get(node) == 0) {
                         queue.offer(node);
                     }
                 }
@@ -261,25 +261,17 @@ public class PageNodeManager {
 
     public PageNode getStartNode() {
         List<PageNode> sortedNodes = topologicalSort();
-        if (sortedNodes.isEmpty()) {
-            return null; // 无可用节点（所有节点已完成或不可用）
-        }
+        System.out.println("getStartNode: Sorted nodes count: " + sortedNodes.size());
+        
         for (PageNode node : sortedNodes) {
+            System.out.println("getStartNode: Checking " + node.fragmentTag + ", completed: " + isCompleted(node.fragmentTag));
             if (!isCompleted(node.fragmentTag)) {
+                System.out.println("getStartNode: Returning " + node.fragmentTag);
                 return node;
             }
-
-            // 检查所有依赖节点的条件
-            for (PageNode dependency : node.dependencies) {
-                if (!dependency.condition.isSatisfied()) {
-                    // 找到第一个不满足条件的依赖节点
-                    return dependency;
-                }
-            }
         }
-
-        // 如果所有节点条件都满足，返回最后一个节点（终点）
-        return sortedNodes.get(sortedNodes.size() - 1);
+        System.out.println("getStartNode: No uncompleted nodes found");
+        return null;
     }
 
     // 标记页面为已访问
@@ -307,4 +299,5 @@ public class PageNodeManager {
             System.out.println(node.fragmentTag + " -> " + Arrays.toString(node.dependencies.toArray()));
         }
     }
+
 }

@@ -13,6 +13,10 @@ import com.louis.mynavi.navi.NavManager;
 import com.louis.mynavi.navi.PageCondition;
 import com.louis.mynavi.navi.PageNavigator;
 import com.louis.mynavi.navi.PageNode;
+import com.louis.mynavi.node.PageNode2;
+import com.louis.mynavi.node.PageNode3;
+import com.louis.mynavi.node.PageNodeManager2;
+import com.louis.mynavi.node.PageNodeManager3;
 import com.louis.mynavi.ui.AgreementFragment;
 import com.louis.mynavi.ui.SplashFragment;
 import com.louis.mynavi.user.ui.login.LoginFragment;
@@ -29,10 +33,72 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        testPage();
+//        testPage();
 //        testDag();
+        setupNavigation3();
     }
 
+    private boolean isLoggedIn() {
+        // 检查登录状态
+        return false;
+    }
+
+    public void setupNavigation3() {
+        PageNodeManager3 manager = PageNodeManager3.getInstance();
+
+        PageCondition agreeCondition = () -> PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("isAgreed6789", false);
+
+
+        PageCondition loginCondition = () -> PageNavigator.getInstance().isLogined;
+        // 创建页面节点
+        PageNode3 splashPage = new PageNode3("splash", SplashFragment.class.getCanonicalName());
+        PageNode3 agreementPage = new PageNode3("agreement", AgreementFragment.class.getCanonicalName());
+        PageNode3 loginPage = new PageNode3("login", LoginFragment.class.getCanonicalName());
+        PageNode3 homePage = new PageNode3("home", HomeFragment.class.getCanonicalName());
+
+        // 设置依赖关系
+        agreementPage.addDependency(SplashFragment.class.getCanonicalName());
+        loginPage.addDependency(AgreementFragment.class.getCanonicalName());
+        homePage.addDependency(LoginFragment.class.getCanonicalName());
+
+        // 添加到管理器
+        manager.addPageNode(splashPage);
+        manager.addPageNode(agreementPage);
+        manager.addPageNode(loginPage);
+        manager.addPageNode(homePage);
+
+        PageNodeManager3.getInstance().navigateToNext(getSupportFragmentManager());
+
+    }
+
+    public void setupNavigation2() {
+        PageNodeManager2 manager = PageNodeManager2.getInstance();
+
+        PageCondition agreeCondition = () -> PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("isAgreed6789", false);
+
+
+        PageCondition loginCondition = () -> PageNavigator.getInstance().isLogined;
+        // 创建页面节点
+        PageNode2 splashPage = new PageNode2("splash", SplashFragment.class, () -> true);
+        PageNode2 agreementPage = new PageNode2("agreement", AgreementFragment.class, () -> !agreeCondition.isSatisfied());
+        PageNode2 loginPage = new PageNode2("login", LoginFragment.class, () -> agreeCondition.isSatisfied() && !loginCondition.isSatisfied());
+        PageNode2 homePage = new PageNode2("home", HomeFragment.class, () -> agreeCondition.isSatisfied() && loginCondition.isSatisfied());
+
+        // 设置依赖关系
+        agreementPage.addDependency(splashPage);
+        loginPage.addDependency(agreementPage);
+        homePage.addDependency(loginPage);
+
+        // 添加到管理器
+        manager.addPageNode(splashPage);
+        manager.addPageNode(agreementPage);
+        manager.addPageNode(loginPage);
+        manager.addPageNode(homePage);
+
+        PageNodeManager2.getInstance().navigateToNext(getSupportFragmentManager());
+    }
 
     private static final String TAG = "MainActivity";
 
@@ -82,13 +148,12 @@ public class MainActivity extends AppCompatActivity {
         //拦截非法跳转
         //DETAIL 仅允许回退（无跳转目标）
 
-
-        PageCondition loginCondition = () -> PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean("isLoggedIn1", false);
-
-
         PageCondition agreeCondition = () -> PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean("isAgreed6", false);
+                .getBoolean("isAgreed6789", false);
+
+
+        PageCondition loginCondition = () -> PageNavigator.getInstance().isLogined;
+
 
         PageNode splashNode = new PageNode(SplashFragment.class);//无条件
 
@@ -140,8 +205,10 @@ public class MainActivity extends AppCompatActivity {
         // 调试：检查所有节点状态
 
 
-        PageNavigator.getInstance().navigateToNext(true);
+//        PageNavigator.getInstance().navigateToNext(true);
+        PageNavigator.getInstance().startNavigation();
     }
+
 
     private void startNavigation() {
 //        NavNode target = navGraph.get(targetTag);

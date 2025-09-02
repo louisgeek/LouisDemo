@@ -11,6 +11,17 @@
     android:paddingBottom="@dimen/fragment_vertical_margin"
     tools:context=".user.ui.login.LoginFragment">
 
+
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="56dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Back" />
+
+
     <EditText
         android:id="@+id/username"
         android:layout_width="0dp"

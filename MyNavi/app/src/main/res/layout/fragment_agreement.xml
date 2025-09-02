@@ -12,6 +12,15 @@
         android:layout_gravity="center"
         android:text="AgreementFragment" />
 
+
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="56dp"
+        android:layout_gravity="bottom"
+        android:text="Back" />
+
     <Button
         android:id="@+id/btnNext"
         android:layout_width="wrap_content"
