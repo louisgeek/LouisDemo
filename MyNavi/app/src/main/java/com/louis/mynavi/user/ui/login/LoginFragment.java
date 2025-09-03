@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
 import com.louis.mynavi.databinding.FragmentLoginBinding;
-import com.louis.mynavi.nav.NavManager;
 import com.louis.mynavi.navi.PageNavigator;
 
 public class LoginFragment extends Fragment {
@@ -39,9 +38,8 @@ public class LoginFragment extends Fragment {
             // 模拟登录成功
             PreferenceManager.getDefaultSharedPreferences(requireContext())
                     .edit().putBoolean("isLogin", true).apply();
-//            PageNavigator.getInstance().isLogined = true;
-//            PageNavigator.getInstance().navigateToNext(true);
-            NavManager.getInstance().navToNext(getParentFragmentManager());
+//            NavManager.getInstance().navToNext(getParentFragmentManager());
+            PageNavigator.getInstance().navigateToNext(true);
         });
     }
 

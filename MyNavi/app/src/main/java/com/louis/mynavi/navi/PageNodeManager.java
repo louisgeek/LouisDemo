@@ -54,7 +54,7 @@ public class PageNodeManager {
         //初始队列（入度为 0 且条件满足）
         for (PageNode node : pageNodeMap.values()) {
             inDegree.put(node, node.dependencies.size());
-            if (inDegree.get(node) == 0 && node.condition.isSatisfied()) {
+            if (inDegree.get(node) == 0 && node.condition.isCompleted()) {
                 queue.offer(node); //入队
             }
         }
@@ -68,7 +68,7 @@ public class PageNodeManager {
                 if (node.dependencies.contains(current)) {
                     inDegree.put(node, inDegree.get(node) - 1);
                     // 如果入度变为0且满足条件，则加入队列
-                    if (inDegree.get(node) == 0 && node.condition.isSatisfied()) {
+                    if (inDegree.get(node) == 0 && node.condition.isCompleted()) {
                         queue.offer(node);
                     }
                 }
@@ -80,7 +80,7 @@ public class PageNodeManager {
         for (PageNode node : pageNodeMap.values()) {
             //homeNode.addDependency(loginNode); loginNode.addDependency(homeNode); 不抛 IllegalStateException 很明显不合理，但又不能去掉 isSatisfied 判断，因为去掉后正常情况下满足条件又会抛出异常
             //经典的 条件感知拓扑排序 问题。需要 分离结构检查和条件检查，解决方案：前置 hasCycleByKahn() 判断，然后删除这里的判断
-            if (!result.contains(node) && node.condition.isSatisfied() && inDegree.get(node) > 0) {
+            if (!result.contains(node) && node.condition.isCompleted() && inDegree.get(node) > 0) {
 //                判断剩余未处理节点且满足条件的，是否还有入度大于0
                 hasCycle = true;
                 break;
@@ -105,7 +105,7 @@ public class PageNodeManager {
         //初始队列（入度为 0 且条件满足）
         for (PageNode node : pageNodeMap.values()) {
             inDegree.put(node, node.dependencies.size());
-            if (inDegree.get(node) == 0 && node.condition.isSatisfied()) {
+            if (inDegree.get(node) == 0 && node.condition.isCompleted()) {
                 queue.offer(node); //入队
             }
         }
@@ -119,7 +119,7 @@ public class PageNodeManager {
                 if (node.dependencies.contains(current)) {
                     inDegree.put(node, inDegree.get(node) - 1);
                     // 如果入度变为0且满足条件，则加入队列
-                    if (inDegree.get(node) == 0 && node.condition.isSatisfied()) {
+                    if (inDegree.get(node) == 0 && node.condition.isCompleted()) {
                         queue.offer(node);
                     }
                 }
@@ -204,7 +204,7 @@ public class PageNodeManager {
             PageNode current = queue.poll();
 
             // 只有条件满足的节点才加入结果
-            if (current.condition.isSatisfied()) {
+            if (current.condition.isCompleted()) {
                 result.add(current);
             }
 

@@ -49,11 +49,11 @@ public class PageNavigator {
     private static final String TAG = "PageNavigator";
 
     public boolean isLogined = false;
-    public boolean isSSSS = false;
 
     public void navigateBack() {
         mNavManager.goBack();
     }
+
     public void navigateToNext(boolean markNodeCompleted) {
         // 1. 获取当前节点（首次使用起始节点）
 //        if (mCurrentNode == null) {

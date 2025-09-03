@@ -15,10 +15,10 @@ public class PageNode {
     public Class<? extends Fragment> fragmentClass;
     public Set<PageNode> dependencies = new HashSet<>(); // 依赖的前置节点  依赖节点集合​​
     public Bundle args;
-    public PageCondition condition = () -> true; //跳转条件  ​​条件检查函数
+    public PageCondition condition; //跳转条件  ​​条件检查函数
 
     public PageNode(Class<? extends Fragment> fragmentClass) {
-        this(fragmentClass, () -> true);
+        this(fragmentClass, () -> false);
     }
 
     public PageNode(Class<? extends Fragment> fragmentClass, PageCondition condition) {
@@ -64,7 +64,7 @@ public class PageNode {
                 ", dependencies=" + dependencies +
 //                ", args=" + args +
 //                ", condition=" + condition +
-                ", condition isSatisfied=" + condition.isSatisfied() +
+                ", condition isSatisfied=" + condition.isCompleted() +
                 '}';
     }
 

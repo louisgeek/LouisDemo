@@ -52,14 +52,14 @@ public class NavManager {
     public void init(Context context) {
         navNodeManager = new NavNodeManager();
 
-        NavNode splashNode = new NavNode(SplashFragment.class, () -> splashCompleted);//未完成
+        NavNode splashNode = new NavNode(SplashFragment.class, () -> splashCompleted);//未完成要显示
 
         NavNode privacyNode = new NavNode(AgreementFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean("isAgreed", false) || agreementCompleted); //未同意 或 未完成
+                .getBoolean("isAgreed", false) || agreementCompleted); //未同意 或 未完成要显示
         privacyNode.addDependency(splashNode); //
 
         NavNode loginNode = new NavNode(LoginFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean("isLogin", false)); //未登录
+                .getBoolean("isLogin", false)); //未登录要显示
         loginNode.addDependency(privacyNode); //登录页 依赖 隐私协议页
 
         NavNode homeNode = new NavNode(HomeFragment.class, () -> false); //固定未完成 一直要显示

@@ -35,10 +35,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        testPage();
+        testPage();
 //        testDag();
 //        setupNavigation3();
-        setupNavigation4();
+//        setupNavigation4();
     }
 
     private void setupNavigation4() {
@@ -92,9 +92,9 @@ public class MainActivity extends AppCompatActivity {
         PageCondition loginCondition = () -> PageNavigator.getInstance().isLogined;
         // 创建页面节点
         PageNode2 splashPage = new PageNode2("splash", SplashFragment.class, () -> true);
-        PageNode2 agreementPage = new PageNode2("agreement", AgreementFragment.class, () -> !agreeCondition.isSatisfied());
-        PageNode2 loginPage = new PageNode2("login", LoginFragment.class, () -> agreeCondition.isSatisfied() && !loginCondition.isSatisfied());
-        PageNode2 homePage = new PageNode2("home", HomeFragment.class, () -> agreeCondition.isSatisfied() && loginCondition.isSatisfied());
+        PageNode2 agreementPage = new PageNode2("agreement", AgreementFragment.class, () -> !agreeCondition.isCompleted());
+        PageNode2 loginPage = new PageNode2("login", LoginFragment.class, () -> agreeCondition.isCompleted() && !loginCondition.isCompleted());
+        PageNode2 homePage = new PageNode2("home", HomeFragment.class, () -> agreeCondition.isCompleted() && loginCondition.isCompleted());
 
         // 设置依赖关系
         agreementPage.addDependency(splashPage);
@@ -158,22 +158,17 @@ public class MainActivity extends AppCompatActivity {
         //拦截非法跳转
         //DETAIL 仅允许回退（无跳转目标）
 
-        PageCondition agreeCondition = () -> PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean("isAgreed6789", false);
+        PageNode splashNode = new PageNode(SplashFragment.class);//未完成要显示
 
-
-        PageCondition loginCondition = () -> PageNavigator.getInstance().isLogined;
-
-
-        PageNode splashNode = new PageNode(SplashFragment.class);//无条件
-
-        PageNode privacyNode = new PageNode(AgreementFragment.class, () -> !agreeCondition.isSatisfied()); //条件：未同意隐私协议
+        PageNode privacyNode = new PageNode(AgreementFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("isAgreed", false)); //未同意 或 未完成要显示
         privacyNode.addDependency(splashNode); //
 
-        PageNode loginNode = new PageNode(LoginFragment.class, () -> agreeCondition.isSatisfied() && !loginCondition.isSatisfied()); //条件：同意隐私协议且未登录
+        PageNode loginNode = new PageNode(LoginFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("isLogin", false)); //未登录要显示
         loginNode.addDependency(privacyNode); //登录页 依赖 隐私协议页
 
-        PageNode homeNode = new PageNode(HomeFragment.class, () -> agreeCondition.isSatisfied() && loginCondition.isSatisfied()); //条件：同意隐私协议且已登录
+        PageNode homeNode = new PageNode(HomeFragment.class); //固定未完成 一直要显示
         homeNode.addDependency(loginNode); //主页页 依赖 登录页
 //        loginNode.addDependency(homeNode);
 

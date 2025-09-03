@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
 import com.louis.mynavi.databinding.FragmentAgreementBinding;
-import com.louis.mynavi.nav.NavManager;
 import com.louis.mynavi.navi.PageNavigator;
 
 /**
@@ -80,11 +79,9 @@ public class AgreementFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-//                PageNavigator.getInstance().markNodeCompleted("AgreementFragment");
-//                PageNavigator.getInstance().navigateToNext(true);
                 PreferenceManager.getDefaultSharedPreferences(binding.getRoot().getContext()).edit().putBoolean(("isAgreed"), true).apply();
-//                PageNavigator.getInstance().navigateToNext(true);
-                NavManager.getInstance().navToNext(getParentFragmentManager());
+//                NavManager.getInstance().navToNext(getParentFragmentManager());
+                PageNavigator.getInstance().navigateToNext(true);
             }
         });
 
@@ -92,11 +89,9 @@ public class AgreementFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-//                PageNavigator.getInstance().markNodeCompleted("AgreementFragment");
-//                PageNavigator.getInstance().navigateToNext(true);
-                NavManager.getInstance().agreementCompleted = true;
-//                PageNavigator.getInstance().navigateToNext(true);
-                NavManager.getInstance().navToNext(getParentFragmentManager());
+//                NavManager.getInstance().agreementCompleted = true;
+//                NavManager.getInstance().navToNext(getParentFragmentManager());
+                PageNavigator.getInstance().navigateToNext(true);
             }
         });
     }

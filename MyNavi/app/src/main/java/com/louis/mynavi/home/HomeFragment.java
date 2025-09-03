@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
 import com.louis.mynavi.databinding.FragmentHomeBinding;
-import com.louis.mynavi.nav.NavManager;
 import com.louis.mynavi.navi.PageNavigator;
 
 public class HomeFragment extends Fragment {
@@ -38,7 +37,8 @@ public class HomeFragment extends Fragment {
         binding.btnLogout.setOnClickListener(v -> {
             PreferenceManager.getDefaultSharedPreferences(requireContext())
                     .edit().putBoolean("isLogin", false).apply();
-            NavManager.getInstance().navToNext(getParentFragmentManager());
+//            NavManager.getInstance().navToNext(getParentFragmentManager());
+            PageNavigator.getInstance().navigateToNext(false);
         });
     }
 
