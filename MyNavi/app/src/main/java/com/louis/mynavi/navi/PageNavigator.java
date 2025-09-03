@@ -93,18 +93,18 @@ public class PageNavigator {
     public void navigateToNext2() {
 //        List<PageNode> order = mPageNodeManager.topologicalSortOne();
 //        List<PageNode> order = mPageNodeManager.topologicalSortTwo();
-        PageNode pageNode = mPageNodeManager.getStartNode();
-        Log.e(TAG, "navigateToNext: pageNode=" + pageNode);
-        if (pageNode != null) {
-            Fragment targetFragment = null;
-            try {
-                targetFragment = pageNode.fragmentClass.newInstance(); //类反射
-                Log.e(TAG, "navigateToNext: targetFragment=" + targetFragment);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
-        }
+//        PageNode pageNode = mPageNodeManager.getStartNode();
+//        Log.e(TAG, "navigateToNext: pageNode=" + pageNode);
+//        if (pageNode != null) {
+//            Fragment targetFragment = null;
+//            try {
+//                targetFragment = pageNode.fragmentClass.newInstance(); //类反射
+//                Log.e(TAG, "navigateToNext: targetFragment=" + targetFragment);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
+//        }
 //        List<PageNode> order = mPageNodeManager.topologicalSort();
 //        List<String> order = mPageNodeManager.topologicalSort();
 //        for (String fragmentTag : order) {
