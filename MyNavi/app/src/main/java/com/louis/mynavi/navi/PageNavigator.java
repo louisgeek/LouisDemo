@@ -58,12 +58,24 @@ public class PageNavigator {
     }
 
     public void navigateToNext(boolean markNodeCompleted) {
-        Log.d("dagManager", mPageNodeManager.printDag());
-        // 1. 获取当前节点（首次使用起始节点）
-//        if (mCurrentNode == null) {
-        PageNode node = mPageNodeManager.getStartNode();
-//        }
+        navigateToNext(null, markNodeCompleted);
+    }
 
+    public void navigateToNext(String targetNodeId, boolean markNodeCompleted) {
+        Log.d("dagManager", mPageNodeManager.printDag());
+
+        PageNode node;
+        if (targetNodeId != null) {
+            // 显式指定目标节点
+            node = mPageNodeManager.getPageNode(targetNodeId);
+            if (node == null) {
+                Log.e(TAG, "Target node not found: " + targetNodeId);
+                return;
+            }
+        } else {
+            // 使用起始节点
+            node = mPageNodeManager.getStartNode();
+        }
 
         Fragment targetFragment = null;
         try {
@@ -73,19 +85,9 @@ public class PageNavigator {
             // 执行跳转
             mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
 
-            // 更新当前节点
-//                    mCurrentNode = targetNode;
-//            if (markNodeCompleted) {
-//                markNodeCompleted(node.fragmentClass);
-//            }
-
-            // 5. 递归检查是否需要继续跳转下一页
-//                    navigateToNext(); // 自动继续跳转
-
         } catch (Exception e) {
             Log.e(TAG, "Fragment instantiation failed", e);
         }
-
     }
 
     public void navigateToNext2() {
@@ -229,6 +231,7 @@ public class PageNavigator {
         // 执行跳转
         mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
     }
+
 
     public void autoNavigate2222() {
         try {

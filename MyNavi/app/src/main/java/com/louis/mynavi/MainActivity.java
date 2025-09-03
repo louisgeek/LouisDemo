@@ -9,8 +9,11 @@ import androidx.preference.PreferenceManager;
 import com.louis.mynavi.dag.DagManager;
 import com.louis.mynavi.dag.DagNode;
 import com.louis.mynavi.home.HomeFragment;
+import com.louis.mynavi.mime.DeviceAddFragment;
+import com.louis.mynavi.mime.DeviceManagerFragment;
+import com.louis.mynavi.mime.FeedbackFragment;
 import com.louis.mynavi.mime.MineFragment;
-import com.louis.mynavi.mime.SettingsFragment;
+import com.louis.mynavi.mime.SettingFragment;
 import com.louis.mynavi.nav.NavManager;
 import com.louis.mynavi.nav.NavNode;
 import com.louis.mynavi.nav.NavNodeManager;
@@ -170,26 +173,34 @@ public class MainActivity extends AppCompatActivity {
                 .getBoolean("isLogin", false)); //未登录要显示
         loginNode.addDependency(privacyNode); //登录页 依赖 隐私协议页
 
-        PageNode homeNode = new PageNode(HomeFragment.class, () -> false); //固定未完成 一直要显示
+//        PageNode homeNode = new PageNode(HomeFragment.class, () -> false); //固定未完成 一直要显示
+        PageNode homeNode = new PageNode(HomeFragment.class, () -> PageNavigator.getInstance().isCompleted(HomeFragment.class)); //固定未完成 一直要显示
         homeNode.addDependency(loginNode); //主页页 依赖 登录页
 //        loginNode.addDependency(homeNode);
 
+        PageNavigator.getInstance().addPageNodes(splashNode, privacyNode, loginNode, homeNode);
+
 
         PageNode mineNode = new PageNode(MineFragment.class, () -> PageNavigator.getInstance().isCompleted(MineFragment.class));//未完成要显示
-        mineNode.addDependency(splashNode);
+        mineNode.addDependency(homeNode);
+        PageNode feedbackNode = new PageNode(FeedbackFragment.class, () -> PageNavigator.getInstance().isCompleted(FeedbackFragment.class));//未完成要显示
+        feedbackNode.addDependency(mineNode);
+
+        PageNavigator.getInstance().addPageNodes(mineNode, feedbackNode);
 
 
-        PageNode settingNode = new PageNode(SettingsFragment.class, () -> PageNavigator.getInstance().isCompleted(SettingsFragment.class));//未完成要显示
-        settingNode.addDependency(splashNode);
-
+        PageNode settingNode = new PageNode(SettingFragment.class, () -> PageNavigator.getInstance().isCompleted(SettingFragment.class));//未完成要显示
+        settingNode.addDependency(homeNode);
+        PageNode deviceManageNode = new PageNode(DeviceManagerFragment.class, () -> PageNavigator.getInstance().isCompleted(DeviceManagerFragment.class));//未完成要显示
+        deviceManageNode.addDependency(settingNode);
+        PageNode deviceAddNode = new PageNode(DeviceAddFragment.class, () -> PageNavigator.getInstance().isCompleted(DeviceAddFragment.class));//未完成要显示
+        deviceAddNode.addDependency(deviceManageNode);
 //        mPageNavigator.addPageNode(splashNode);
 //        mPageNavigator.addPageNode(privacyNode);
 //        mPageNavigator.addPageNode(loginNode);
 //        mPageNavigator.addPageNode(homeNode);
 
-        PageNavigator.getInstance().addPageNodes(splashNode, privacyNode, loginNode, homeNode);
-
-        PageNavigator.getInstance().addPageNodes(mineNode, settingNode);
+        PageNavigator.getInstance().addPageNodes(settingNode, deviceManageNode, deviceAddNode);
 
 //        mPageNodeManager.addEdge("AgreementFragment", "LoginFragment");
 //        //
