@@ -9,6 +9,8 @@ import androidx.preference.PreferenceManager;
 import com.louis.mynavi.dag.DagManager;
 import com.louis.mynavi.dag.DagNode;
 import com.louis.mynavi.home.HomeFragment;
+import com.louis.mynavi.mime.MineFragment;
+import com.louis.mynavi.mime.SettingsFragment;
 import com.louis.mynavi.nav.NavManager;
 import com.louis.mynavi.nav.NavNode;
 import com.louis.mynavi.nav.NavNodeManager;
@@ -172,12 +174,22 @@ public class MainActivity extends AppCompatActivity {
         homeNode.addDependency(loginNode); //主页页 依赖 登录页
 //        loginNode.addDependency(homeNode);
 
+
+        PageNode mineNode = new PageNode(MineFragment.class, () -> PageNavigator.getInstance().isCompleted(MineFragment.class));//未完成要显示
+        mineNode.addDependency(splashNode);
+
+
+        PageNode settingNode = new PageNode(SettingsFragment.class, () -> PageNavigator.getInstance().isCompleted(SettingsFragment.class));//未完成要显示
+        settingNode.addDependency(splashNode);
+
 //        mPageNavigator.addPageNode(splashNode);
 //        mPageNavigator.addPageNode(privacyNode);
 //        mPageNavigator.addPageNode(loginNode);
 //        mPageNavigator.addPageNode(homeNode);
 
         PageNavigator.getInstance().addPageNodes(splashNode, privacyNode, loginNode, homeNode);
+
+        PageNavigator.getInstance().addPageNodes(mineNode, settingNode);
 
 //        mPageNodeManager.addEdge("AgreementFragment", "LoginFragment");
 //        //

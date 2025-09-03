@@ -2,6 +2,7 @@ package com.louis.mynavi.navi;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.louis.mynavi.R;
@@ -161,7 +162,75 @@ public class PageNavigator {
         }
     }
 
-    public void autoNavigate() {
+    // 检查是否可以跳转到指定步骤
+    public boolean canNavigateTo(String fragmentTag) {
+        PageNode targetNode = mPageNodeManager.getAllNodes().stream()
+                .filter(node -> fragmentTag.equals(node.fragmentTag))
+                .findFirst()
+                .orElse(null);
+
+        Log.e(TAG, "canNavigateTo targetNode: " + targetNode);
+        if (targetNode == null) {
+            return false;
+        }
+
+        // 检查所有依赖是否满足条件
+        for (PageNode dependency : targetNode.dependencies) {
+            if (!dependency.isCompleted()) {
+                Log.e(TAG, "canNavigateTo dependency isCompleted=false dependency=" + dependency);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void autoNavigate(@NonNull String targetKey) {
+//        if (fragmentManager == null || pageNodeManager == null) {
+//            throw new IllegalStateException("Navigator not initialized");
+//        }
+
+        // 检查循环依赖
+//        Set<String> visited = new HashSet<>();
+//        if (!pageNodeManager.checkDependencies(targetKey, visited)) {
+//            throw new IllegalStateException("Circular dependency detected for: " + targetKey);
+//        }
+
+        // 检查导航条件
+        if (!canNavigateTo(targetKey)) {
+            // 尝试导航到依赖节点
+            PageNode targetNode = mPageNodeManager.getPageNode(targetKey);
+            if (targetNode != null) {
+                for (PageNode depKey : targetNode.dependencies) {
+                    if (!canNavigateTo(depKey.fragmentTag)) {
+                        autoNavigate(depKey.fragmentTag);
+                        return;
+                    }
+                }
+            }
+            throw new IllegalStateException("Cannot navigate to: " + targetKey + ". Dependencies not met.");
+        }
+        Class<? extends Fragment> fragmentClass = null;
+        try {
+            fragmentClass = (Class<? extends Fragment>) Class.forName(targetKey);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        Fragment targetFragment = null;
+        try {
+            targetFragment = fragmentClass.newInstance();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        }
+        Log.e(TAG, "navigateToNext: Target fragment=" + targetFragment);
+
+        // 执行跳转
+        mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
+    }
+
+    public void autoNavigate2222() {
         try {
             List<PageNode> order = mPageNodeManager.topologicalSort();
             Log.e(TAG, "autoNavigate: available nodes=" + order.size());

@@ -45,6 +45,10 @@ public class PageNodeManager {
         return pageNodeMap.get(fragmentTag);
     }
 
+    public List<PageNode> getAllNodes() {
+        return new ArrayList<>(pageNodeMap.values());
+    }
+
     @Deprecated
     public List<PageNode> topologicalSortOne() {
         Map<PageNode, Integer> inDegree = new HashMap<>();
