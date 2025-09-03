@@ -158,17 +158,17 @@ public class MainActivity extends AppCompatActivity {
         //拦截非法跳转
         //DETAIL 仅允许回退（无跳转目标）
 
-        PageNode splashNode = new PageNode(SplashFragment.class);//未完成要显示
+        PageNode splashNode = new PageNode(SplashFragment.class, () -> PageNavigator.getInstance().isCompleted(SplashFragment.class));//未完成要显示
 
         PageNode privacyNode = new PageNode(AgreementFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean("isAgreed", false)); //未同意 或 未完成要显示
+                .getBoolean("isAgreed", false) || PageNavigator.getInstance().isCompleted(AgreementFragment.class)); //未同意 或 未完成要显示
         privacyNode.addDependency(splashNode); //
 
         PageNode loginNode = new PageNode(LoginFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(this)
                 .getBoolean("isLogin", false)); //未登录要显示
         loginNode.addDependency(privacyNode); //登录页 依赖 隐私协议页
 
-        PageNode homeNode = new PageNode(HomeFragment.class); //固定未完成 一直要显示
+        PageNode homeNode = new PageNode(HomeFragment.class, () -> false); //固定未完成 一直要显示
         homeNode.addDependency(loginNode); //主页页 依赖 登录页
 //        loginNode.addDependency(homeNode);
 
@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
         // 4. 执行导航（会自动跳过未满足条件的Fragment）
 //        mPageNavigator.navigateTo("Home"); // 实际路径：privacyNode -> loginNode（按照条件满足实际处理 可能Home不会加载）
         // 调试：检查所有节点状态
-
+        Log.d("dagManager", PageNavigator.getInstance().printDag());
 
 //        PageNavigator.getInstance().navigateToNext(true);
         PageNavigator.getInstance().startNavigation();

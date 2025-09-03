@@ -4,7 +4,9 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -43,6 +45,17 @@ public class PageNode {
         dependencies.remove(node);
     }
 
+    public boolean isCompleted() {
+        if (condition != null && !condition.isCompleted()) {
+            return false;
+        }
+        for (PageNode dependency : dependencies) {
+            if (!dependency.isCompleted()) {
+                return false;
+            }
+        }
+        return true;
+    }
     public boolean isDependentOn(PageNode node) {
         if (dependencies.contains(node)) {
             return true;
@@ -69,4 +82,29 @@ public class PageNode {
     }
 
 
+    public String printDependencyTree(String indent, boolean isLast, Set<String> visited) {
+        if (visited.contains(fragmentTag)) {
+            return indent + (isLast ? "└── " : "├── ") + fragmentTag + " (循环依赖)\n";
+        }
+
+        visited.add(fragmentTag);
+        String currentIndent = indent + (isLast ? "└── " : "├── ");
+        String childIndent = indent + (isLast ? "    " : "│   ");
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(currentIndent).append(fragmentTag).append(" (").append(fragmentClass).append(")");
+
+        // 添加条件状态
+        String conditionStatus = (condition != null && !condition.isCompleted()) ? " 未完成要显示" : " 已完成跳过";
+        builder.append(conditionStatus).append("\n");
+
+        // 递归打印所有依赖
+        List<PageNode> dependencyList = new ArrayList<>(dependencies);
+        for (int i = 0; i < dependencyList.size(); i++) {
+            boolean isLastDependency = i == dependencyList.size() - 1;
+            builder.append(dependencyList.get(i).printDependencyTree(childIndent, isLastDependency, new HashSet<>(visited)));
+        }
+
+        return builder.toString();
+    }
 }

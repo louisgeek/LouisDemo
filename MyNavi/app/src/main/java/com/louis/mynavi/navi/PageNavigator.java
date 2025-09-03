@@ -6,7 +6,9 @@ import androidx.fragment.app.Fragment;
 
 import com.louis.mynavi.R;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PageNavigator {
     private static volatile PageNavigator instance;
@@ -29,7 +31,7 @@ public class PageNavigator {
     private NavManager mNavManager;
     private PageNodeManager mPageNodeManager;
 
-    private PageNode mCurrentNode; // 记录当前节点
+//    private PageNode mCurrentNode; // 记录当前节点
 
     public void init(NavManager navManager) {
         this.mNavManager = navManager;
@@ -55,52 +57,34 @@ public class PageNavigator {
     }
 
     public void navigateToNext(boolean markNodeCompleted) {
+        Log.d("dagManager", mPageNodeManager.printDag());
         // 1. 获取当前节点（首次使用起始节点）
 //        if (mCurrentNode == null) {
-        mCurrentNode = mPageNodeManager.getStartNode();
+        PageNode node = mPageNodeManager.getStartNode();
 //        }
 
-        Log.e(TAG, "navigateToNext: Current node=" + mCurrentNode);
 
-        if (mCurrentNode != null) {
-            // 2. 获取所有可能的下一个节点
-//            List<PageNode> nextNodes = mPageNodeManager.getNextNodes(mCurrentNode);
-//
-//            // 3. 查找第一个满足条件的节点
-//            PageNode targetNode = null;
-//            for (PageNode node : nextNodes) {
-//                if (node.condition.isSatisfied()) {
-//                    targetNode = node;
-//                    break;
-//                }
+        Fragment targetFragment = null;
+        try {
+            targetFragment = node.fragmentClass.newInstance();
+            Log.e(TAG, "navigateToNext: Target fragment=" + targetFragment);
+
+            // 执行跳转
+            mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
+
+            // 更新当前节点
+//                    mCurrentNode = targetNode;
+//            if (markNodeCompleted) {
+//                markNodeCompleted(node.fragmentClass);
 //            }
 
-            // 4. 如果找到满足条件的节点则跳转
-            if (mCurrentNode != null) {
-                Fragment targetFragment = null;
-                try {
-                    targetFragment = mCurrentNode.fragmentClass.newInstance();
-                    Log.e(TAG, "navigateToNext: Target fragment=" + targetFragment);
-
-                    // 执行跳转
-                    mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
-
-                    // 更新当前节点
-//                    mCurrentNode = targetNode;
-                    if (markNodeCompleted) {
-                        mPageNodeManager.markNodeCompleted(mCurrentNode.fragmentTag);
-                    }
-
-                    // 5. 递归检查是否需要继续跳转下一页
+            // 5. 递归检查是否需要继续跳转下一页
 //                    navigateToNext(); // 自动继续跳转
 
-                } catch (Exception e) {
-                    Log.e(TAG, "Fragment instantiation failed", e);
-                }
-            } else {
-                Log.e(TAG, "No next node with satisfied condition");
-            }
+        } catch (Exception e) {
+            Log.e(TAG, "Fragment instantiation failed", e);
         }
+
     }
 
     public void navigateToNext2() {
@@ -196,17 +180,34 @@ public class PageNavigator {
         }
     }
 
-    public void startNavigation() {
-        mCurrentNode = mPageNodeManager.getStartNode();
 
-        if (mCurrentNode != null) {
-            try {
-                Fragment targetFragment = mCurrentNode.fragmentClass.newInstance();
-                mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
-                Log.e(TAG, "startNavigation: Started with " + mCurrentNode.fragmentTag);
-            } catch (Exception e) {
-                Log.e(TAG, "startNavigation: Failed", e);
-            }
+    public void startNavigation() {
+        PageNode startNode = mPageNodeManager.getStartNode();
+        Log.e(TAG, "startNavigation startNode: " + startNode);
+        try {
+            Fragment targetFragment = startNode.fragmentClass.newInstance();
+            mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
+        } catch (Exception e) {
+            Log.e(TAG, "startNavigation: Failed", e);
         }
+    }
+
+    public String printDag() {
+        return mPageNodeManager.printDag();
+    }
+
+    private Set<String> completedNodes = new HashSet<>();
+
+    // 标记页面为已访问
+    public void markNodeCompleted(Class<? extends Fragment> fragmentClass) {
+//        if (pageNodeMap.containsKey(fragmentTag)) {
+        String fragmentTag = fragmentClass.getSimpleName();
+        completedNodes.add(fragmentTag);
+//        }
+    }
+
+    public boolean isCompleted(Class<? extends Fragment> fragmentClass) {
+        String fragmentTag = fragmentClass.getSimpleName();
+        return completedNodes.contains(fragmentTag);
     }
 }

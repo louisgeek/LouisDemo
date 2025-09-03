@@ -1,7 +1,6 @@
 package com.louis.mynavi.navi;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -9,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class PageNodeManager {
 
@@ -20,7 +20,7 @@ public class PageNodeManager {
     //导航图（DAG 的“边”）
     //    private Map<String, PageNode> navGraph = new HashMap<>();
     private Map<PageNode, Set<PageNode>> navGraphMap = new HashMap<>();
-    private Set<String> completedNodes = new HashSet<>();
+
     //添加节点
 
     public void addPageNode(PageNode pageNode) {
@@ -203,10 +203,9 @@ public class PageNodeManager {
         while (!queue.isEmpty()) {
             PageNode current = queue.poll();
 
-            // 只有条件满足的节点才加入结果
-            if (current.condition.isCompleted()) {
+//            if (!current.condition.isCompleted()) {
                 result.add(current);
-            }
+//            }
 
             // 处理依赖关系（无论条件是否满足）
             for (PageNode node : pageNodeMap.values()) {
@@ -264,28 +263,21 @@ public class PageNodeManager {
         System.out.println("getStartNode: Sorted nodes count: " + sortedNodes.size());
         
         for (PageNode node : sortedNodes) {
-            System.out.println("getStartNode: Checking " + node.fragmentTag + ", completed: " + isCompleted(node.fragmentTag));
-            if (!isCompleted(node.fragmentTag)) {
-                System.out.println("getStartNode: Returning " + node.fragmentTag);
+            if (!node.isCompleted()) {
                 return node;
             }
+            //带测试
+            for (PageNode dependency : node.dependencies) {
+                if (!dependency.isCompleted()) {
+                    return dependency;
+                }
+            }
         }
-        System.out.println("getStartNode: No uncompleted nodes found");
-        return null;
-    }
-
-    // 标记页面为已访问
-    public void markNodeCompleted(String fragmentTag) {
-        if (pageNodeMap.containsKey(fragmentTag)) {
-            completedNodes.add(fragmentTag);
-        }
+        return sortedNodes.isEmpty() ? null : sortedNodes.get(sortedNodes.size() - 1);
     }
 
 
     // 检查页面是否已访问
-    public boolean isCompleted(String fragmentTag) {
-        return completedNodes.contains(fragmentTag);
-    }
 //    public String getNextPage(String currentPageId) {
 //        PageNode nextPages = pageNodeMap.get(currentPageId);
 //        if (nextPages.dependencies != null && !nextPages.dependencies.isEmpty()) {
@@ -294,10 +286,22 @@ public class PageNodeManager {
 //        return null;
 //    }
 
-    public void printDAG() {
-        for (PageNode node : pageNodeMap.values()) {
-            System.out.println(node.fragmentTag + " -> " + Arrays.toString(node.dependencies.toArray()));
+    public String printDag() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("DAG依赖关系图:\n");
+
+        // 获取所有没有被依赖的节点（终端节点）
+        List<PageNode> terminalNodes = pageNodeMap.values().stream()
+                .filter(node -> pageNodeMap.values().stream().noneMatch(n -> n.dependencies.contains(node)))
+                .collect(Collectors.toList());
+
+        // 从终端节点开始打印
+        for (int i = 0; i < terminalNodes.size(); i++) {
+            boolean isLast = i == terminalNodes.size() - 1;
+            builder.append(terminalNodes.get(i).printDependencyTree("", isLast, new HashSet<>()));
         }
+
+        return builder.toString();
     }
 
 }

@@ -81,6 +81,7 @@ public class AgreementFragment extends Fragment {
 
                 PreferenceManager.getDefaultSharedPreferences(binding.getRoot().getContext()).edit().putBoolean(("isAgreed"), true).apply();
 //                NavManager.getInstance().navToNext(getParentFragmentManager());
+//                PageNavigator.getInstance().markNodeCompleted(AgreementFragment.class);
                 PageNavigator.getInstance().navigateToNext(true);
             }
         });
@@ -91,6 +92,7 @@ public class AgreementFragment extends Fragment {
 
 //                NavManager.getInstance().agreementCompleted = true;
 //                NavManager.getInstance().navToNext(getParentFragmentManager());
+                PageNavigator.getInstance().markNodeCompleted(AgreementFragment.class);
                 PageNavigator.getInstance().navigateToNext(true);
             }
         });

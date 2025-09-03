@@ -58,14 +58,13 @@ public class NavNodeManager {
      */
     private List<NavNode> topologicalSort() {
         Map<NavNode, Integer> inDegree = new HashMap<>();
+        Queue<NavNode> queue = new ArrayDeque<>();
 
-        // Calculate in-degrees
+
         for (NavNode node : pageNodeMap.values()) {
             inDegree.put(node, node.getDependencies().size());
         }
 
-        // Initialize queue with nodes having in-degree 0
-        Queue<NavNode> queue = new ArrayDeque<>();
         for (Map.Entry<NavNode, Integer> entry : inDegree.entrySet()) {
             if (entry.getValue() == 0) {
                 NavNode node = entry.getKey();

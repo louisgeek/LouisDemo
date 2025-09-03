@@ -75,6 +75,8 @@ public class SplashFragment extends Fragment {
 
 //                NavManager.getInstance().splashCompleted = true;
 //                NavManager.getInstance().navToNext(getParentFragmentManager());
+
+                PageNavigator.getInstance().markNodeCompleted(SplashFragment.class);
                 PageNavigator.getInstance().navigateToNext(true);
             }
         });
