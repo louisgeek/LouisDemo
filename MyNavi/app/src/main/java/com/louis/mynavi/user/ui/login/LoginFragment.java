@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
 import com.louis.mynavi.databinding.FragmentLoginBinding;
-import com.louis.mynavi.navi.FlowManager;
+import com.louis.mynavi.nav.NavManager;
 import com.louis.mynavi.navi.PageNavigator;
 
 public class LoginFragment extends Fragment {

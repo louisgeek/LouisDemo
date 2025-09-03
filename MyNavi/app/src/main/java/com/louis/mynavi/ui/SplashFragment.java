@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.louis.mynavi.databinding.FragmentSplashBinding;
-import com.louis.mynavi.navi.FlowManager;
+import com.louis.mynavi.nav.NavManager;
 
 /**
  * A simple {@link Fragment} subclass.

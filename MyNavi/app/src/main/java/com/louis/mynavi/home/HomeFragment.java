@@ -8,8 +8,10 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 
 import com.louis.mynavi.databinding.FragmentHomeBinding;
+import com.louis.mynavi.nav.NavManager;
 import com.louis.mynavi.navi.PageNavigator;
 
 public class HomeFragment extends Fragment {

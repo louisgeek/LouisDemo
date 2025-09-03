@@ -13,41 +13,42 @@ import java.util.stream.Collectors;
  * DAG管理器，负责管理节点和执行流程
  */
 public class NavNodeManager {
-    private final Map<String, NavNode> nodes = new HashMap<>();
+    private final Map<String, NavNode> pageNodeMap = new HashMap<>();
 
     // 添加节点
     public void addNode(NavNode node) {
         // 检查是否会形成循环依赖
-        for (NavNode existingNode : nodes.values()) {
+        for (NavNode existingNode : pageNodeMap.values()) {
             if (node.isDependentOn(existingNode) && existingNode.isDependentOn(node)) {
                 throw new IllegalArgumentException("添加节点 " + node.getFragmentTag() + " 会导致循环依赖");
             }
         }
-        nodes.put(node.getFragmentTag(), node);
+        pageNodeMap.put(node.getFragmentTag(), node);
     }
 
     // 获取节点
     public NavNode getNode(String id) {
-        return nodes.get(id);
+        return pageNodeMap.get(id);
     }
 
     // 获取所有节点
     public List<NavNode> getAllNodes() {
-        return new ArrayList<>(nodes.values());
+        return new ArrayList<>(pageNodeMap.values());
     }
 
     // 获取指定节点的所有依赖节点
     public List<NavNode> getDependencies(String nodeId) {
-        NavNode node = nodes.get(nodeId);
+        NavNode node = pageNodeMap.get(nodeId);
         return node != null ? new ArrayList<>(node.getDependencies()) : new ArrayList<>();
     }
 
     // 获取依赖于指定节点的所有节点
-    public List<NavNode> getDependents(String nodeId) {
-        NavNode node = nodes.get(nodeId);
-        if (node == null) return new ArrayList<>();
+    public List<NavNode> getDependents(NavNode node) {
+        if (node == null) {
+            return new ArrayList<>();
+        }
 
-        return nodes.values().stream()
+        return pageNodeMap.values().stream()
                 .filter(n -> n.getDependencies().contains(node))
                 .collect(Collectors.toList());
     }
@@ -55,26 +56,21 @@ public class NavNodeManager {
     /**
      * 获取拓扑排序的节点列表（基于入度的Kahn算法）
      */
-    private List<NavNode> getStartNodes() {
-        Map<String, Integer> inDegree = new HashMap<>();
-        Map<String, NavNode> nodeMap = new HashMap<>();
-
-        for (NavNode node : nodes.values()) {
-            nodeMap.put(node.getFragmentTag(), node);
-        }
+    private List<NavNode> topologicalSort() {
+        Map<NavNode, Integer> inDegree = new HashMap<>();
 
         // Calculate in-degrees
-        for (NavNode node : nodes.values()) {
-            inDegree.put(node.getFragmentTag(), node.getDependencies().size());
+        for (NavNode node : pageNodeMap.values()) {
+            inDegree.put(node, node.getDependencies().size());
         }
 
         // Initialize queue with nodes having in-degree 0
         Queue<NavNode> queue = new ArrayDeque<>();
-        for (Map.Entry<String, Integer> entry : inDegree.entrySet()) {
+        for (Map.Entry<NavNode, Integer> entry : inDegree.entrySet()) {
             if (entry.getValue() == 0) {
-                NavNode node = nodeMap.get(entry.getKey());
+                NavNode node = entry.getKey();
                 if (node != null) {
-                    queue.add(node);
+                    queue.offer(node);
                 }
             }
         }
@@ -83,22 +79,22 @@ public class NavNodeManager {
 
         // Process nodes in topological order
         while (!queue.isEmpty()) {
-            NavNode node = queue.poll();
-            result.add(node);
+            NavNode current = queue.poll();
+            result.add(current);
 
-            for (NavNode dependent : getDependents(node.getFragmentTag())) {
-                int currentDegree = inDegree.getOrDefault(dependent.getFragmentTag(), 0) - 1;
-                inDegree.put(dependent.getFragmentTag(), currentDegree);
+            for (NavNode node : getDependents(current)) {
+                int currentDegree = inDegree.getOrDefault(node, 0) - 1;
+                inDegree.put(node, currentDegree);
                 if (currentDegree == 0) {
-                    queue.add(dependent);
+                    queue.offer(node);
                 }
             }
         }
 
         // Check for circular dependencies
-        if (result.size() != nodes.size()) {
+        if (result.size() != pageNodeMap.size()) {
             List<String> cycleNodeIds = new ArrayList<>();
-            for (NavNode node : nodes.values()) {
+            for (NavNode node : pageNodeMap.values()) {
                 if (!result.contains(node)) {
                     cycleNodeIds.add(node.getFragmentTag());
                 }
@@ -113,7 +109,7 @@ public class NavNodeManager {
      * 获取第一个可执行的节点
      */
     public NavNode getStartNode() {
-        List<NavNode> sortedNodes = getStartNodes();
+        List<NavNode> sortedNodes = topologicalSort();
 
         for (NavNode node : sortedNodes) {
             // 检查节点自身条件
@@ -141,8 +137,8 @@ public class NavNodeManager {
         builder.append("DAG依赖关系图:\n");
 
         // 获取所有没有被依赖的节点（终端节点）
-        List<NavNode> terminalNodes = nodes.values().stream()
-                .filter(node -> nodes.values().stream().noneMatch(n -> n.getDependencies().contains(node)))
+        List<NavNode> terminalNodes = pageNodeMap.values().stream()
+                .filter(node -> pageNodeMap.values().stream().noneMatch(n -> n.getDependencies().contains(node)))
                 .collect(Collectors.toList());
 
         // 从终端节点开始打印
