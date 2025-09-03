@@ -57,12 +57,12 @@ public class NavNode {
 
 
     // 检查节点条件是否满足
-    public boolean isSatisfied() {
-        if (condition != null && !condition.isSatisfied()) {
+    public boolean isCompleted() {
+        if (condition != null && !condition.isCompleted()) {
             return false;
         }
         for (NavNode dependency : dependencies) {
-            if (!dependency.isSatisfied()) {
+            if (!dependency.isCompleted()) {
                 return false;
             }
         }
@@ -109,7 +109,7 @@ public class NavNode {
         builder.append(currentIndent).append(fragmentTag).append(" (").append(fragmentClass).append(")");
 
         // 添加条件状态
-        String conditionStatus = (condition != null && !condition.isSatisfied()) ? " 未完成要显示" : " 已完成跳过";
+        String conditionStatus = (condition != null && !condition.isCompleted()) ? " 未完成要显示" : " 已完成跳过";
         builder.append(conditionStatus).append("\n");
 
         // 递归打印所有依赖

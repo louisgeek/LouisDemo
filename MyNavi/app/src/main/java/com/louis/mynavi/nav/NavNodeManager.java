@@ -113,13 +113,13 @@ public class NavNodeManager {
 
         for (NavNode node : sortedNodes) {
             // 检查节点自身条件
-            if (!node.isSatisfied()) {
+            if (!node.isCompleted()) {
                 return node;
             }
 
             // 检查所有依赖节点的条件
             for (NavNode dependency : node.getDependencies()) {
-                if (!dependency.isSatisfied()) {
+                if (!dependency.isCompleted()) {
                     return dependency;
                 }
             }

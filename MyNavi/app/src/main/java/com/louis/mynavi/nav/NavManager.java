@@ -52,17 +52,17 @@ public class NavManager {
     public void init(Context context) {
         navNodeManager = new NavNodeManager();
 
-        NavNode splashNode = new NavNode(SplashFragment.class, () -> splashCompleted);//无条件
+        NavNode splashNode = new NavNode(SplashFragment.class, () -> splashCompleted);//未完成
 
         NavNode privacyNode = new NavNode(AgreementFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean("isAgreed", false) || agreementCompleted); //条件：未同意隐私协议
+                .getBoolean("isAgreed", false) || agreementCompleted); //未同意 或 未完成
         privacyNode.addDependency(splashNode); //
 
         NavNode loginNode = new NavNode(LoginFragment.class, () -> PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean("isLogin", false)); //条件：同意隐私协议且未登录
+                .getBoolean("isLogin", false)); //未登录
         loginNode.addDependency(privacyNode); //登录页 依赖 隐私协议页
 
-        NavNode homeNode = new NavNode(HomeFragment.class); //条件：同意隐私协议且已登录
+        NavNode homeNode = new NavNode(HomeFragment.class, () -> false); //固定未完成 一直要显示
         homeNode.addDependency(loginNode); //主页页 依赖 登录页
 
         navNodeManager.addNode(splashNode);
@@ -90,7 +90,7 @@ public class NavManager {
 
         // 检查所有依赖是否满足条件
         for (NavNode dependency : targetNode.getDependencies()) {
-            if (!dependency.isSatisfied()) {
+            if (!dependency.isCompleted()) {
                 return false;
             }
         }
