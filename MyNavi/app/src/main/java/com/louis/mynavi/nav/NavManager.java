@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -45,11 +46,11 @@ public class NavManager {
     public boolean agreementCompleted = false;
 
 
-    private NavNodeManager navNodeManager01;
+    private NavNodeManager navNodeManager;
     private NavNodeManager navNodeManager02;
 
     public void init(Context context) {
-        navNodeManager01 = new NavNodeManager();
+        navNodeManager = new NavNodeManager();
 
         NavNode splashNode = new NavNode(SplashFragment.class, () -> splashCompleted);//无条件
 
@@ -64,20 +65,20 @@ public class NavManager {
         NavNode homeNode = new NavNode(HomeFragment.class); //条件：同意隐私协议且已登录
         homeNode.addDependency(loginNode); //主页页 依赖 登录页
 
-        navNodeManager01.addNode(splashNode);
-        navNodeManager01.addNode(privacyNode);
-        navNodeManager01.addNode(loginNode);
-        navNodeManager01.addNode(homeNode);
+        navNodeManager.addNode(splashNode);
+        navNodeManager.addNode(privacyNode);
+        navNodeManager.addNode(loginNode);
+        navNodeManager.addNode(homeNode);
 
-        Log.d("dagManager", navNodeManager01.printDag());
+        Log.d("dagManager", navNodeManager.printDag());
     }
 
-    public NavNodeManager getNavNodeManager01() {
-        return navNodeManager01;
+    public NavNodeManager getNavNodeManager() {
+        return navNodeManager;
     }
 
     // 检查是否可以跳转到指定步骤
-    public boolean canNavigateTo(String step, NavNodeManager navNodeManager) {
+    public boolean canNavigateTo(String step) {
         NavNode targetNode = navNodeManager.getAllNodes().stream()
                 .filter(node -> step.equals(node.getFragmentClass()))
                 .findFirst()
@@ -99,9 +100,9 @@ public class NavManager {
 
     // 封装导航到下一步的逻辑
     public boolean navToNext(FragmentManager fragmentManager) {
-        Log.d("dagManager", navNodeManager01.printDag());
+        Log.d("dagManager", navNodeManager.printDag());
         //
-        NavNode node = navNodeManager01.getStartNode();
+        NavNode node = navNodeManager.getStartNode();
 //        navController.navigate(route);
         if (node != null) {
             navigateToFragment(fragmentManager, node.getFragmentClass(), null);
@@ -111,6 +112,39 @@ public class NavManager {
         return true;
     }
 
+    public void autoNavigate(FragmentManager fragmentManager, @NonNull String targetKey) {
+//        if (fragmentManager == null || pageNodeManager == null) {
+//            throw new IllegalStateException("Navigator not initialized");
+//        }
+
+        // 检查循环依赖
+//        Set<String> visited = new HashSet<>();
+//        if (!pageNodeManager.checkDependencies(targetKey, visited)) {
+//            throw new IllegalStateException("Circular dependency detected for: " + targetKey);
+//        }
+
+        // 检查导航条件
+        if (!canNavigateTo(targetKey)) {
+            // 尝试导航到依赖节点
+            NavNode targetNode = navNodeManager.getNode(targetKey);
+            if (targetNode != null) {
+                for (NavNode depKey : targetNode.getDependencies()) {
+                    if (!canNavigateTo(depKey.getFragmentTag())) {
+                        autoNavigate(fragmentManager, depKey.getFragmentTag());
+                        return;
+                    }
+                }
+            }
+            throw new IllegalStateException("Cannot navigate to: " + targetKey + ". Dependencies not met.");
+        }
+        Class<?> fragmentClass = null;
+        try {
+            fragmentClass = Class.forName(targetKey);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        navigateToFragment(fragmentManager, fragmentClass, null);
+    }
 
     public void navigateToFragment(FragmentManager fragmentManager, Class<?> fragmentClass, Bundle args) {
         // Fragment跳转逻辑
@@ -152,5 +186,23 @@ public class NavManager {
         }
         ///如果在主线程外调用，可以改用 commitAllowingStateLoss
         transaction.commit();
+    }
+
+    private Fragment createFragment(Class<? extends Fragment> fragmentClass) {
+        try {
+            return fragmentClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private Fragment createFragment(Class<? extends Fragment> fragmentClass, Bundle args) {
+        try {
+            return fragmentClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

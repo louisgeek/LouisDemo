@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupNavigation4() {
         NavManager.getInstance().init(this);
-        NavNodeManager navNodeManager01 = NavManager.getInstance().getNavNodeManager01();
-        NavNode startNode = navNodeManager01.getStartNode();
+        NavNodeManager navNodeManager = NavManager.getInstance().getNavNodeManager();
+        NavNode startNode = navNodeManager.getStartNode();
         Log.e(TAG, "setupNavigation4: startNode=" + startNode.getFragmentTag());
         if (startNode != null) {
             NavManager.getInstance().navigateToFragment(getSupportFragmentManager(), startNode.getFragmentClass(), null);
