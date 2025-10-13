@@ -8,5 +8,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface NewsRemoteDataSource extends ResourceCloseable {
+    //CompletableFuture<List<NewsDto>> getData();
     CompletableFuture<List<NewsDto>> fetchData();
 }
