@@ -3,9 +3,7 @@ package com.louis.lg_archj.domain.model;
 public class News {
     private String id;
     private String title;
-
-    public News() {
-    }
+    public boolean selected;
 
     public News(String id, String title) {
         this.id = id;

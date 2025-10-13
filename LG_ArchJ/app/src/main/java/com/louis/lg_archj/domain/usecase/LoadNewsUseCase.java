@@ -1,6 +1,5 @@
 package com.louis.lg_archj.domain.usecase;
 
-import com.louis.lg_archj.ResourceCloseable;
 import com.louis.lg_archj.data.repository.NewsRepository;
 import com.louis.lg_archj.domain.model.News;
 
