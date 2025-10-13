@@ -16,7 +16,7 @@ public class LoadNewsUseCase implements BaseUseCase<Void, CompletableFuture<List
     }
 
     @Override
-    public CompletableFuture<List<News>> execute(Void params) {
+    public CompletableFuture<List<News>> invoke(Void params) {
         //UseCase 聚焦业务
         return repository.getData()
                 .thenApply(list -> {

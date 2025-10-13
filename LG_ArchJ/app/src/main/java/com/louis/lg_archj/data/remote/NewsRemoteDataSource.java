@@ -2,11 +2,11 @@ package com.louis.lg_archj.data.remote;
 
 
 import com.louis.lg_archj.ResourceCloseable;
-import com.louis.lg_archj.domain.model.News;
+import com.louis.lg_archj.data.remote.dto.NewsDto;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface NewsRemoteDataSource extends ResourceCloseable {
-    CompletableFuture<List<News>> fetchData();
+    CompletableFuture<List<NewsDto>> fetchData();
 }

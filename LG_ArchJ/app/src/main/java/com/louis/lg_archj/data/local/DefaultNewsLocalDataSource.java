@@ -1,6 +1,6 @@
 package com.louis.lg_archj.data.local;
 
-import com.louis.lg_archj.domain.model.News;
+import com.louis.lg_archj.data.local.entity.NewsEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +12,10 @@ import java.util.concurrent.Executors;
 public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
 
     private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
-    private final List<News> localCache = new CopyOnWriteArrayList<>();
+    private final List<NewsEntity> localCache = new CopyOnWriteArrayList<>();
 
     @Override
-    public CompletableFuture<List<News>> loadData() {
+    public CompletableFuture<List<NewsEntity>> loadData() {
         return CompletableFuture.supplyAsync(() -> {
             // 模拟本地查询延迟（200ms）
             try {
@@ -28,7 +28,7 @@ public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
     }
 
     @Override
-    public CompletableFuture<Void> saveData(List<News> news) {
+    public CompletableFuture<Void> saveData(List<NewsEntity> news) {
         return CompletableFuture.runAsync(() -> {
             // 模拟本地保存延迟（200ms）
             try {
