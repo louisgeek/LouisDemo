@@ -64,10 +64,10 @@ public class NewsViewModel extends ViewModel {
     // 执行刷新数据业务
     private void handleRefreshData() {
         // 保持当前数据并设置刷新状态
-//        NewsUiState currentState = _uiState.getValue();
-//        if (currentState != null && currentState.data != null) {
-            _uiState.setValue(NewsUiState.refreshing(null));
-//        }
+        NewsUiState currentState = _uiState.getValue();
+        if (currentState != null && currentState.data != null) {
+            _uiState.setValue(NewsUiState.refreshing(currentState.data));
+        }
         loadNewsUseCase.invoke(null)
                 // 异步回调：在主线程处理结果
                 .whenCompleteAsync((data, throwable) -> {

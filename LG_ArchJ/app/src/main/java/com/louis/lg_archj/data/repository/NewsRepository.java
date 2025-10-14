@@ -8,6 +8,7 @@ import com.louis.lg_archj.data.mapper.NewsMapper;
 import com.louis.lg_archj.domain.model.News;
 import com.louis.lg_archj.data.remote.NewsRemoteDataSource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -25,28 +26,28 @@ public class NewsRepository implements ResourceCloseable {
     public CompletableFuture<List<News>> getData() {
         return localDataSource.queryData()
                 .thenCompose(localData -> {
-                    if (!localData.isEmpty()) {
-                        //本地有数据：直接返回
+                    if (localData != null && !localData.isEmpty()) {
+                        Log.e(TAG, "本地有数据：直接返回" + localData);
                         return CompletableFuture.completedFuture(
                                 localData.stream()
                                         .map(NewsMapper::entityToModel)
                                         .collect(Collectors.toList())
-                        ).whenComplete((data, throwable) -> {
-                            if (throwable != null) {
-                                Log.e(TAG, "处理本地数据时发生错误", throwable);
-                            } else {
-                                Log.d(TAG, "本地数据处理完成，数据量: " + data.size());
-                            }
-                        });
+                        );
                     } else {
                         //本地无数据，查远程数据
                         return remoteDataSource.fetchData()
                                 .thenCompose(remoteData -> {
-                                    Log.d(TAG, "远程数据获取完成，数据量: " + (remoteData != null ? remoteData.size() : 0));
+                                    if (remoteData == null || remoteData.isEmpty()) {
+                                        return CompletableFuture.completedFuture(new ArrayList<>());
+//                                        return CompletableFuture.completedFuture(Collections.<List<News>>emptyList());
+//                                        return CompletableFuture.completedFuture(List.<List<News>>of());
+                                    }
+                                    Log.d(TAG, "远程数据获取完成，数据量: " + remoteData.size());
                                     // 缓存远程数据到本地，再返回数据
                                     return localDataSource.saveData(
                                             remoteData.stream()
                                                     .map(NewsMapper::dtoToEntity)
+                                                    .peek(entity -> entity.setTitle(entity.getTitle().replace("（远程）", "") + "（本地）"))
                                                     .collect(Collectors.toList())
                                     ).thenApply(v -> {
                                         Log.d(TAG, "远程数据已保存到本地");
@@ -54,19 +55,7 @@ public class NewsRepository implements ResourceCloseable {
                                                 .map(NewsMapper::dtoToModel)
                                                 .collect(Collectors.toList());
                                     });
-                                }).whenComplete((data, throwable) -> {
-                                    if (throwable != null) {
-                                        Log.e(TAG, "处理远程数据时发生错误", throwable);
-                                    } else {
-                                        Log.d(TAG, "远程数据处理完成，数据量: " + data.size());
-                                    }
                                 });
-                    }
-                }).whenComplete((result, throwable) -> {
-                    if (throwable != null) {
-                        Log.e(TAG, "获取数据过程中发生错误", throwable);
-                    } else {
-                        Log.d(TAG, "数据获取流程完成");
                     }
                 });
     }

@@ -10,7 +10,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
     private static final String TAG = "DefaultNewsLocalDataSource";
@@ -21,22 +20,16 @@ public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
     public CompletableFuture<List<NewsEntity>> queryData() {
         return CompletableFuture.supplyAsync(() -> {
             Log.d(TAG, "查询本地数据，线程: " + Thread.currentThread().getName());
-            // 模拟本地查询延迟（200ms）
+            // 模拟本地查询延迟
             try {
-                Thread.sleep(200);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
-                Log.e(TAG, "本地查询被中断", e);
                 Thread.currentThread().interrupt();
             }
-            Log.d(TAG, "本地数据加载完成，数据量: " + localCache.size());
-            return (List<NewsEntity>) new ArrayList<>(localCache); // 返回缓存副本
-        }, ioExecutor).whenComplete((result, throwable) -> {
-            if (throwable != null) {
-                Log.e(TAG, "查询本地数据失败", throwable);
-            } else {
-                Log.d(TAG, "查询本地数据成功，数据量: " + result.size());
-            }
-        });
+            Log.d(TAG, "查询本地数据完成，数据量: " + localCache.size());
+//            return (List<NewsEntity>) new ArrayList<>(localCache); // 返回缓存副本
+            return new ArrayList<>(localCache); // 返回缓存副本
+        }, ioExecutor);
     }
 
     @Override
@@ -47,19 +40,12 @@ public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
-                Log.e(TAG, "本地保存被中断", e);
                 Thread.currentThread().interrupt();
             }
             localCache.clear();
             localCache.addAll(news); // 更新本地缓存
-            Log.d(TAG, "本地数据保存完成，新数据量: " + localCache.size());
-        }, ioExecutor).whenComplete((result, throwable) -> {
-            if (throwable != null) {
-                Log.e(TAG, "保存本地数据失败", throwable);
-            } else {
-                Log.d(TAG, "保存本地数据成功");
-            }
-        });
+            Log.d(TAG, "保存本地数据完成，新数据量: " + localCache.size());
+        }, ioExecutor);
     }
 
     @Override
