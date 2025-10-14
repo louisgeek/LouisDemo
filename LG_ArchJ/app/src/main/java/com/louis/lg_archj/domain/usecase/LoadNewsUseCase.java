@@ -21,7 +21,7 @@ public class LoadNewsUseCase implements BaseUseCase<Void, CompletableFuture<List
                 .thenApply(list -> {
                     // 最终返回前可统一处理数据（如过滤）
                     return list.stream()
-                            .filter(user -> user.getTitle().contains("远程") || user.getTitle().contains("本地"))
+//                            .filter(user -> user.getTitle().contains("远程") || user.getTitle().contains("本地"))
                             .collect(Collectors.toList());
                 });
     }

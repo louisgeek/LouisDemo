@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 
 public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
     private static final String TAG = "DefaultNewsLocalDataSource";
-    private static final long CACHE_EXPIRE_TIME = 1 * 60 * 1000;
+    private static final long CACHE_EXPIRE_TIME = 1 * 10 * 1000;
     private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
     private final List<NewsEntity> localCache = new CopyOnWriteArrayList<>();
     private volatile long cacheTimestamp = 0;
