@@ -46,7 +46,7 @@ public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
             List<NewsEntity> cachedData = memoryCache.get(CACHE_KEY);
             if (cachedData != null) {
                 for (NewsEntity cachedDatum : cachedData) {
-                    cachedDatum.setTitle(cachedDatum.getTitle() + "（内存）");
+                    cachedDatum.setTitle(cachedDatum.getTitle().replace("（内存）", "").replace("（磁盘）", "").replace("（网络）", "") + "（内存）");
                 }
                 Log.d(TAG, "从内存缓存获取数据，数据量: " + cachedData.size());
                 return new ArrayList<>(cachedData);
@@ -66,7 +66,7 @@ public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
                 memoryCache.put(CACHE_KEY, new ArrayList<>(dbData));
                 memoryCacheTimestamp = System.currentTimeMillis();
                 for (NewsEntity cachedDatum : dbData) {
-                    cachedDatum.setTitle(cachedDatum.getTitle() + "（磁盘）");
+                    cachedDatum.setTitle(cachedDatum.getTitle().replace("（内存）", "").replace("（磁盘）", "").replace("（网络）", "") + "（磁盘）");
                 }
                 return new ArrayList<>(dbData);
             }
