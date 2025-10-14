@@ -2,9 +2,11 @@ package com.louis.lg_archj.ui.news;
 
 import android.util.Log;
 
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import java.util.concurrent.Executor;
 
@@ -17,7 +19,7 @@ import com.louis.lg_archj.data.remote.DefaultNewsRemoteDataSource;
 import com.louis.lg_archj.data.repository.NewsRepository;
 import com.louis.lg_archj.domain.usecase.LoadNewsUseCase;
 
-public class NewsViewModel extends ViewModel {
+public class NewsViewModel extends AndroidViewModel {
     private static final String TAG = "NewsViewModel";
     private final LoadNewsUseCase loadNewsUseCase;
     private final MutableLiveData<NewsUiState> _uiState = new MutableLiveData<>(NewsUiState.initial());
@@ -26,8 +28,10 @@ public class NewsViewModel extends ViewModel {
     //主线程执行器
     private final Executor mainThreadExecutor = new MainThreadExecutor();
 
-    public NewsViewModel() {
-        NewsLocalDataSource localDataSource = new DefaultNewsLocalDataSource();
+    public NewsViewModel(Application application) {
+        super(application);
+
+        NewsLocalDataSource localDataSource = new DefaultNewsLocalDataSource(application.getApplicationContext());
         NewsRemoteDataSource remoteDataSource = new DefaultNewsRemoteDataSource();
         NewsRepository repository = new NewsRepository(localDataSource, remoteDataSource);
 

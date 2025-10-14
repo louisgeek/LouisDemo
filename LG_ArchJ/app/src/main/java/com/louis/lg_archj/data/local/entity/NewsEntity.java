@@ -1,6 +1,11 @@
 package com.louis.lg_archj.data.local.entity;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "news")
 public class NewsEntity {
+    @PrimaryKey
     private String id;
     private String title;
 
