@@ -17,11 +17,12 @@ import androidx.collection.LruCache;
 
 public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
     private static final String TAG = "DefaultNewsLocalDataSource";
-    private static final long CACHE_EXPIRE_TIME = 1 * 10 * 1000;
+    private static final long MEMORY_CACHE_EXPIRE_TIME = 1 * 10 * 1000; // 10秒
+    private static final long DISK_CACHE_EXPIRE_TIME = 1 * 60 * 1000; // 1分钟
     private static final String CACHE_KEY = "news_list";
     private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
     private final LruCache<String, List<NewsEntity>> memoryCache = new LruCache<>(1);
-    private volatile long cacheTimestamp = 0;
+    private volatile long memoryCacheTimestamp = 0;
     private final NewsDao newsDao;
 
     public DefaultNewsLocalDataSource(Context context) {
@@ -35,15 +36,18 @@ public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
             Log.d(TAG, "查询本地数据，线程: " + Thread.currentThread().getName());
 
             // 检查内存缓存是否过期
-            if (isCacheExpired()) {
+            if (isMemoryCacheExpired()) {
                 Log.d(TAG, "内存缓存已过期，清空内存缓存");
                 memoryCache.evictAll();
-                cacheTimestamp = 0;
+                memoryCacheTimestamp = 0;
             }
 
             // 优先从内存缓存获取
             List<NewsEntity> cachedData = memoryCache.get(CACHE_KEY);
             if (cachedData != null) {
+                for (NewsEntity cachedDatum : cachedData) {
+                    cachedDatum.setTitle(cachedDatum.getTitle() + "（内存）");
+                }
                 Log.d(TAG, "从内存缓存获取数据，数据量: " + cachedData.size());
                 return new ArrayList<>(cachedData);
             }
@@ -51,9 +55,19 @@ public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
             // 从数据库获取
             List<NewsEntity> dbData = newsDao.getAllNews();
             if (!dbData.isEmpty()) {
+                // 检查磁盘缓存是否过期
+                if (isDiskCacheExpired(dbData.get(0).getTimestamp())) {
+                    Log.d(TAG, "磁盘缓存已过期，清空数据库");
+                    newsDao.deleteAll();
+                    return new ArrayList<>();
+                }
+                
                 Log.d(TAG, "从数据库获取数据，数据量: " + dbData.size());
                 memoryCache.put(CACHE_KEY, new ArrayList<>(dbData));
-                cacheTimestamp = System.currentTimeMillis();
+                memoryCacheTimestamp = System.currentTimeMillis();
+                for (NewsEntity cachedDatum : dbData) {
+                    cachedDatum.setTitle(cachedDatum.getTitle() + "（磁盘）");
+                }
                 return new ArrayList<>(dbData);
             }
 
@@ -73,14 +87,18 @@ public class DefaultNewsLocalDataSource implements NewsLocalDataSource {
 
             // 更新内存缓存
             memoryCache.put(CACHE_KEY, new ArrayList<>(news));
-            cacheTimestamp = System.currentTimeMillis();
+            memoryCacheTimestamp = System.currentTimeMillis();
 
             Log.d(TAG, "保存本地数据完成，新数据量: " + news.size());
         }, ioExecutor);
     }
 
-    private boolean isCacheExpired() {
-        return cacheTimestamp == 0 || (System.currentTimeMillis() - cacheTimestamp) > CACHE_EXPIRE_TIME;
+    private boolean isMemoryCacheExpired() {
+        return memoryCacheTimestamp == 0 || (System.currentTimeMillis() - memoryCacheTimestamp) > MEMORY_CACHE_EXPIRE_TIME;
+    }
+
+    private boolean isDiskCacheExpired(long diskTimestamp) {
+        return (System.currentTimeMillis() - diskTimestamp) > DISK_CACHE_EXPIRE_TIME;
     }
 
     @Override

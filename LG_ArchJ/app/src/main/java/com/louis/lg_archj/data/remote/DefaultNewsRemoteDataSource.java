@@ -52,7 +52,7 @@ public class DefaultNewsRemoteDataSource implements NewsRemoteDataSource {
                 List<NewsDto> newsList = new ArrayList<>();
                 if (apiResponse.getData() != null && apiResponse.getData().getDatas() != null) {
                     for (WanAndroidResponse.WanAndroidData data : apiResponse.getData().getDatas()) {
-                        newsList.add(new NewsDto(String.valueOf(data.getId()), data.getTitle()));
+                        newsList.add(new NewsDto(String.valueOf(data.getId()), data.getTitle() + "（网络）"));
                     }
                 }
 

@@ -47,7 +47,7 @@ public class NewsRepository implements ResourceCloseable {
                                     return localDataSource.saveData(
                                             remoteData.stream()
                                                     .map(NewsMapper::dtoToEntity)
-                                                    .peek(entity -> entity.setTitle(entity.getTitle().replace("（远程）", "") + "（本地）"))
+                                                    .peek(entity -> entity.setTitle(entity.getTitle()))
                                                     .collect(Collectors.toList())
                                     ).thenApply(v -> {
                                         Log.d(TAG, "远程数据已保存到本地");
