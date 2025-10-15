@@ -6,6 +6,8 @@ import com.louis.lg_archj.data.remote.api.WanAndroidApi;
 import com.louis.lg_archj.data.remote.dto.NewsDto;
 import com.louis.lg_archj.data.remote.dto.WanAndroidResponse;
 
+import com.louis.lg_archj.core.result.Result;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,20 +21,25 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DefaultNewsRemoteDataSource implements NewsRemoteDataSource {
     private static final String TAG = "DefaultNewsRemoteDataSource";
-    private static final String BASE_URL = "https://wanandroid.com/";
     private final ExecutorService networkExecutor = Executors.newFixedThreadPool(3);
     private final WanAndroidApi api;
 
-    public DefaultNewsRemoteDataSource() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        api = retrofit.create(WanAndroidApi.class);
+    public DefaultNewsRemoteDataSource(WanAndroidApi api) {
+        this.api = api;
     }
 
     @Override
     public CompletableFuture<List<NewsDto>> fetchData() {
+        return fetchDataAsResult().thenApply(result -> {
+            if (result.isSuccess()) {
+                return ((Result.Success<List<NewsDto>>) result).getData();
+            } else {
+                throw new RuntimeException(((Result.Error<List<NewsDto>>) result).getMessage());
+            }
+        });
+    }
+
+    public CompletableFuture<Result<List<NewsDto>>> fetchDataAsResult() {
         return CompletableFuture.supplyAsync(() -> {
             Log.d(TAG, "请求远程数据，线程: " + Thread.currentThread().getName());
 
@@ -41,12 +48,12 @@ public class DefaultNewsRemoteDataSource implements NewsRemoteDataSource {
                 Response<WanAndroidResponse> response = api.getArticleList(pageIndex).execute();
 
                 if (!response.isSuccessful()) {
-                    throw new RuntimeException("网络请求失败: " + response.code());
+                    return new Result.Error<>("网络请求失败: " + response.code());
                 }
 
                 WanAndroidResponse apiResponse = response.body();
                 if (apiResponse == null || apiResponse.getErrorCode() != 0) {
-                    throw new RuntimeException("API错误: " + (apiResponse != null ? apiResponse.getErrorMsg() : "响应为空"));
+                    return new Result.Error<>("数据解析失败: " + (apiResponse != null ? apiResponse.getErrorMsg() : "响应为空"));
                 }
 
                 List<NewsDto> newsList = new ArrayList<>();
@@ -57,10 +64,13 @@ public class DefaultNewsRemoteDataSource implements NewsRemoteDataSource {
                 }
 
                 Log.d(TAG, "请求远程数据完成，数据量: " + newsList.size());
-                return newsList;
+                return new Result.Success<>(newsList);
             } catch (IOException e) {
                 Log.e(TAG, "网络请求异常", e);
-                throw new RuntimeException("网络请求失败: " + e.getMessage());
+                return new Result.Error<>("网络连接失败，请检查网络设置", e);
+            } catch (Exception e) {
+                Log.e(TAG, "未知错误", e);
+                return new Result.Error<>("未知错误，请稍后重试", e);
             }
         }, networkExecutor);
     }

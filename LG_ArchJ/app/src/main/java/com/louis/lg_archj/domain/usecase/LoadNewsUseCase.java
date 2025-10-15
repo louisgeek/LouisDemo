@@ -1,13 +1,14 @@
 package com.louis.lg_archj.domain.usecase;
 
-import com.louis.lg_archj.data.repository.NewsRepository;
+import com.louis.lg_archj.core.result.Result;
 import com.louis.lg_archj.domain.model.News;
+import com.louis.lg_archj.domain.repository.NewsRepository;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class LoadNewsUseCase implements BaseUseCase<Void, CompletableFuture<List<News>>> {
+public class LoadNewsUseCase implements BaseUseCase<Void, CompletableFuture<Result<List<News>>>> {
     private final NewsRepository repository;
 
     public LoadNewsUseCase(NewsRepository repository) {
@@ -15,14 +16,18 @@ public class LoadNewsUseCase implements BaseUseCase<Void, CompletableFuture<List
     }
 
     @Override
-    public CompletableFuture<List<News>> invoke(Void params) {
+    public CompletableFuture<Result<List<News>>> invoke(Void params) {
         //UseCase 聚焦业务
         return repository.getData()
-                .thenApply(list -> {
-                    // 最终返回前可统一处理数据（如过滤）
-                    return list.stream()
-//                            .filter(user -> user.getTitle().contains("远程") || user.getTitle().contains("本地"))
-                            .collect(Collectors.toList());
+                .thenApply(result -> {
+                    if (result.isSuccess()) {
+                        Result.Success<List<News>> success = (Result.Success<List<News>>) result;
+                        List<News> filteredList = success.getData().stream()
+//                                .filter(news -> news.getTitle().contains("远程") || news.getTitle().contains("本地"))
+                                .collect(Collectors.toList());
+                        return new Result.Success<>(filteredList);
+                    }
+                    return result; // 错误继续传递
                 });
     }
 

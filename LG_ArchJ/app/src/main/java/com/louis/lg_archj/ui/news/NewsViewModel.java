@@ -2,9 +2,7 @@ package com.louis.lg_archj.ui.news;
 
 import android.util.Log;
 
-import android.app.Application;
-
-import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -12,14 +10,13 @@ import java.util.concurrent.Executor;
 
 
 import com.louis.lg_archj.MainThreadExecutor;
-import com.louis.lg_archj.data.local.NewsLocalDataSource;
-import com.louis.lg_archj.data.local.DefaultNewsLocalDataSource;
-import com.louis.lg_archj.data.remote.NewsRemoteDataSource;
-import com.louis.lg_archj.data.remote.DefaultNewsRemoteDataSource;
-import com.louis.lg_archj.data.repository.NewsRepository;
+import com.louis.lg_archj.core.result.Result;
+import com.louis.lg_archj.domain.model.News;
 import com.louis.lg_archj.domain.usecase.LoadNewsUseCase;
 
-public class NewsViewModel extends AndroidViewModel {
+import java.util.List;
+
+public class NewsViewModel extends ViewModel {
     private static final String TAG = "NewsViewModel";
     private final LoadNewsUseCase loadNewsUseCase;
     private final MutableLiveData<NewsUiState> _uiState = new MutableLiveData<>(NewsUiState.initial());
@@ -28,14 +25,8 @@ public class NewsViewModel extends AndroidViewModel {
     //主线程执行器
     private final Executor mainThreadExecutor = new MainThreadExecutor();
 
-    public NewsViewModel(Application application) {
-        super(application);
-
-        NewsLocalDataSource localDataSource = new DefaultNewsLocalDataSource(application.getApplicationContext());
-        NewsRemoteDataSource remoteDataSource = new DefaultNewsRemoteDataSource();
-        NewsRepository repository = new NewsRepository(localDataSource, remoteDataSource);
-
-        this.loadNewsUseCase = new LoadNewsUseCase(repository);
+    public NewsViewModel(LoadNewsUseCase loadNewsUseCase) {
+        this.loadNewsUseCase = loadNewsUseCase;
     }
 
     //处理用户意图
@@ -55,13 +46,18 @@ public class NewsViewModel extends AndroidViewModel {
 
         loadNewsUseCase.invoke(null)
                 // 异步回调：在主线程处理结果
-                .whenCompleteAsync((data, throwable) -> {
-                    Log.e(TAG, "invoke 数2据 data " + data.size());
+                .whenCompleteAsync((result, throwable) -> {
                     if (throwable != null) {
-                        _uiState.setValue(NewsUiState.loadError(throwable.getMessage()));
+                        _uiState.setValue(NewsUiState.loadError("加载失败，请稍后重试"));
                         return;
                     }
-                    _uiState.setValue(NewsUiState.loadSuccess(data));
+                    if (result.isSuccess()) {
+                        Result.Success<List<News>> success = (Result.Success<List<News>>) result;
+                        _uiState.setValue(NewsUiState.loadSuccess(success.getData()));
+                    } else {
+                        Result.Error<List<News>> error = (Result.Error<List<News>>) result;
+                        _uiState.setValue(NewsUiState.loadError(error.getMessage()));
+                    }
                 }, mainThreadExecutor); //指定主线程执行器
     }
 
@@ -74,17 +70,24 @@ public class NewsViewModel extends AndroidViewModel {
         }
         loadNewsUseCase.invoke(null)
                 // 异步回调：在主线程处理结果
-                .whenCompleteAsync((data, throwable) -> {
-                    Log.e(TAG, "invoke 数据 data " + data.size());
+                .whenCompleteAsync((result, throwable) -> {
                     if (throwable != null) {
-                        // 保持现有数据并仅更新错误和刷新状态
                         NewsUiState _currentState = _uiState.getValue();
                         if (_currentState != null && _currentState.data != null) {
-                            _uiState.setValue(NewsUiState.refreshError(_currentState.data, throwable.getMessage()));
+                            _uiState.setValue(NewsUiState.refreshError(_currentState.data, "刷新失败，请稍后重试"));
                         }
                         return;
                     }
-                    _uiState.setValue(NewsUiState.refreshSuccess(data));
+
+                    NewsUiState _currentState = _uiState.getValue();
+                    List<News> currentData = _currentState != null ? _currentState.data : null;
+                    if (result.isSuccess()) {
+                        Result.Success<List<News>> success = (Result.Success<List<News>>) result;
+                        _uiState.setValue(NewsUiState.refreshSuccess(success.getData()));
+                    } else {
+                        Result.Error<List<News>> error = (Result.Error<List<News>>) result;
+                        _uiState.setValue(NewsUiState.refreshError(currentData, error.getMessage()));
+                    }
                 }, mainThreadExecutor); //指定主线程执行器
     }
 

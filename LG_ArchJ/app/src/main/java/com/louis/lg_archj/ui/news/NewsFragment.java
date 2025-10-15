@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.louis.lg_archj.di.AppContainer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.louis.lg_archj.databinding.FragmentNewsBinding;
@@ -46,8 +48,10 @@ public class NewsFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        // 初始化 ViewModel
-        viewModel = new ViewModelProvider(this).get(NewsViewModel.class);
+        // 初始化 ViewModel 使用依赖注入
+        AppContainer container = AppContainer.getInstance();
+        NewsViewModelFactory factory = new NewsViewModelFactory(container.getLoadNewsUseCase());
+        viewModel = new ViewModelProvider(this, factory).get(NewsViewModel.class);
     }
 
     @Override
