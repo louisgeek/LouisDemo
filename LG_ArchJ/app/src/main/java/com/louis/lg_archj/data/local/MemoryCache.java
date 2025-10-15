@@ -7,6 +7,7 @@ public class MemoryCache {
 
     public static final long TIME_UNIT_SECOND = 1000;
     public static final long TIME_UNIT_MINUTE = 60 * TIME_UNIT_SECOND;
+    //androidx.collection.LruCache
     private final LruCache<String, CacheEntry<Object>> lruCache;
 
     private static volatile MemoryCache sInstance;
@@ -42,6 +43,10 @@ public class MemoryCache {
         lruCache.remove(key);
     }
 
+    public void clear() {
+        //移除缓存中的所有键值对
+        lruCache.evictAll();
+    }
     public Object get(String key) {
         CacheEntry<Object> item = lruCache.get(key);
         if (item == null) {
