@@ -1,5 +1,7 @@
 package com.louis.lg_archj.data.repository;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class OfflineFirstNewsRepository implements NewsRepository {
-
+    private static final String TAG = "OfflineFirstNewsRepo";
     private static final String CACHE_KEY = "news_list";
     private static final long CACHE_EXPIRE_TIME = 10 * MemoryCache.TIME_UNIT_SECOND;
 
