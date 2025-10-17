@@ -34,16 +34,14 @@ public class OfflineFirstNewsRepository implements NewsRepository {
     @Override
     @SuppressWarnings("unchecked")
     public LiveData<Result<List<News>>> getData() {
-        MutableLiveData<Result<List<News>>> newsLiveData = new MutableLiveData<>();
-
-        // 内存缓存检查
+        MutableLiveData<Result<List<News>>> mutableLiveData = new MutableLiveData<>();
+        //内存缓存
         List<News> cachedData = (List<News>) memoryCache.get(CACHE_KEY);
         if (cachedData != null) {
-            newsLiveData.setValue(new Result.Success<>(cachedData));
-            return newsLiveData;
+            mutableLiveData.setValue(new Result.Success<>(cachedData));
+            return mutableLiveData;
         }
-
-        // 查询本地数据库，添加异常处理
+        //查数据库
         localDataSource.queryData()
                 .thenAccept(localData -> {
                     if (localData != null && !localData.isEmpty()) {
@@ -51,19 +49,19 @@ public class OfflineFirstNewsRepository implements NewsRepository {
                                 .map(NewsMapper::entityToModel)
                                 .collect(Collectors.toList());
                         memoryCache.put(CACHE_KEY, newsList, CACHE_EXPIRE_TIME);
-                        newsLiveData.postValue(new Result.Success<>(newsList));
+                        mutableLiveData.postValue(new Result.Success<>(newsList));
                         return;
                     }
-                    //网络请求
-                    fetchFromNetwork(newsLiveData);
+                    //本地数据为空，从网络获取
+                    fetchFromNetwork(mutableLiveData);
                 })
                 .exceptionally(throwable -> {
-                    //网络请求
-                    fetchFromNetwork(newsLiveData);
+                    //数据库查询失败，尝试网络请求
+                    fetchFromNetwork(mutableLiveData);
                     return null;
                 });
 
-        return newsLiveData;
+        return mutableLiveData;
     }
 
     private void fetchFromNetwork(MutableLiveData<Result<List<News>>> newsLiveData) {
@@ -73,23 +71,19 @@ public class OfflineFirstNewsRepository implements NewsRepository {
                         newsLiveData.postValue(new Result.Success<>(List.of()));
                         return;
                     }
-
                     List<News> newsList = remoteData.stream()
                             .map(NewsMapper::dtoToModel)
                             .collect(Collectors.toList());
-
-                    // 先缓存和返回数据
-                    memoryCache.put(CACHE_KEY, newsList, CACHE_EXPIRE_TIME);
-                    newsLiveData.postValue(new Result.Success<>(newsList));
-
-                    // 异步保存到数据库
+                    //异步保存到数据库
                     localDataSource.saveData(
                             newsList.stream()
                                     .map(NewsMapper::modelToEntity)
                                     .collect(Collectors.toList())
                     );
-                })
-                .exceptionally(throwable -> {
+                    //存到内存缓存
+                    memoryCache.put(CACHE_KEY, newsList, CACHE_EXPIRE_TIME);
+                    newsLiveData.postValue(new Result.Success<>(newsList));
+                }).exceptionally(throwable -> {
                     newsLiveData.postValue(new Result.Error<>("网络请求失败: " + throwable.getMessage()));
                     return null;
                 });
