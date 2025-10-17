@@ -2,6 +2,9 @@ package com.louis.lg_archj.data.repository;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.louis.lg_archj.core.result.Result;
 import com.louis.lg_archj.data.local.MemoryCache;
 import com.louis.lg_archj.data.local.NewsLocalDataSource;
@@ -12,13 +15,13 @@ import com.louis.lg_archj.data.remote.NewsRemoteDataSource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+
 import java.util.stream.Collectors;
 
 public class DefaultNewsRepository implements NewsRepository {
     private static final String TAG = "DefaultNewsRepository";
     private static final String CACHE_KEY = "news_list";
-    private static final long MEMORY_CACHE_EXPIRE_TIME = 10 * MemoryCache.TIME_UNIT_SECOND;
+    private static final long CACHE_EXPIRE_TIME = 10 * MemoryCache.TIME_UNIT_SECOND;
 
     private final NewsLocalDataSource localDataSource;
     private final NewsRemoteDataSource remoteDataSource;
@@ -32,59 +35,81 @@ public class DefaultNewsRepository implements NewsRepository {
 
     @Override
     @SuppressWarnings("unchecked")
-    public CompletableFuture<Result<List<News>>> getData() {
-        // 先检查内存缓存
+    public LiveData<Result<List<News>>> getData() {
+        MutableLiveData<Result<List<News>>> mutableLiveData = new MutableLiveData<>();
+        //内存缓存
         List<News> cachedData = (List<News>) memoryCache.get(CACHE_KEY);
         if (cachedData != null) {
             Log.d(TAG, "从内存缓存获取数据，数据量: " + cachedData.size());
-            return CompletableFuture.completedFuture(new Result.Success<>(new ArrayList<>(cachedData)));
+            mutableLiveData.setValue(new Result.Success<>(cachedData));
+            //返回数据的同时继续网络请求
+            fetchFromNetwork(mutableLiveData);
+            return mutableLiveData;
         }
-
-        return localDataSource.queryData()
-                .thenCompose(localData -> {
+        //查数据库
+        localDataSource.queryData()
+                .thenAccept(localData -> {
                     if (localData != null && !localData.isEmpty()) {
-                        Log.e(TAG, "本地有数据：直接返回" + localData);
                         List<News> newsList = localData.stream()
                                 .map(NewsMapper::entityToModel)
                                 .collect(Collectors.toList());
-                        // 缓存到内存
-                        memoryCache.put(CACHE_KEY, new ArrayList<>(newsList), MEMORY_CACHE_EXPIRE_TIME);
-                        return CompletableFuture.completedFuture(new Result.Success<>(newsList));
+                        Log.d(TAG, "从数据库获取数据，数据量: " + newsList.size());
+                        memoryCache.put(CACHE_KEY, newsList, CACHE_EXPIRE_TIME);
+                        mutableLiveData.postValue(new Result.Success<>(newsList));
+                        //返回数据的同时继续网络请求
+                        fetchFromNetwork(mutableLiveData);
                     } else {
-                        //本地无数据，查远程数据
-                        return remoteDataSource.fetchData()
-                                .thenCompose(remoteData -> {
-                                    if (remoteData == null || remoteData.isEmpty()) {
-                                        return CompletableFuture.completedFuture(new Result.Success<>(new ArrayList<>()));
-                                    }
-                                    Log.d(TAG, "远程数据获取完成，数据量: " + remoteData.size());
-
-                                    List<News> newsList = remoteData.stream()
-                                            .map(NewsMapper::dtoToModel)
-                                            .collect(Collectors.toList());
-
-                                    // 缓存远程数据到本地，再返回数据
-                                    return localDataSource.saveData(
-                                            newsList.stream()
-                                                    .map(NewsMapper::modelToEntity)
-                                                    .peek(entity -> entity.setTitle(entity.getTitle()))
-                                                    .collect(Collectors.toList())
-                                    ).thenApply(v -> {
-                                        Log.d(TAG, "远程数据已保存到本地");
-
-                                        // 缓存到内存
-                                        memoryCache.put(CACHE_KEY, new ArrayList<>(newsList), MEMORY_CACHE_EXPIRE_TIME);
-                                        return new Result.Success<>(newsList);
-                                    });
-                                });
+                        //本地数据为空，从网络获取
+                        fetchFromNetwork(mutableLiveData);
                     }
+                })
+                .exceptionally(throwable -> {
+                    //数据库查询失败，尝试网络请求
+                    fetchFromNetwork(mutableLiveData);
+                    return null;
+                });
+        return mutableLiveData;
+    }
+
+    private void fetchFromNetwork(MutableLiveData<Result<List<News>>> mutableLiveData) {
+        remoteDataSource.fetchData()
+                .thenAccept(remoteData -> {
+                    if (remoteData == null || remoteData.isEmpty()) {
+                        mutableLiveData.postValue(new Result.Success<>(List.of()));
+                        return;
+                    }
+                    List<News> newsList = remoteData.stream()
+                            .map(NewsMapper::dtoToModel)
+                            .collect(Collectors.toList());
+                    // 异步保存到数据库
+                    localDataSource.saveData(newsList.stream()
+                            .map(NewsMapper::modelToEntity)
+                            .collect(Collectors.toList()));
+
+                    Log.d(TAG, "网络数据获取成功，数据量: " + newsList.size());
+                    //存到内存缓存
+                    memoryCache.put(CACHE_KEY, new ArrayList<>(newsList), CACHE_EXPIRE_TIME);
+                    mutableLiveData.postValue(new Result.Success<>(newsList));
+
+                })
+                .exceptionally(throwable -> {
+                    Log.e(TAG, "网络请求失败", throwable);
+                    mutableLiveData.postValue(new Result.Error<>("网络请求失败: " + throwable.getMessage()));
+                    return null;
                 });
     }
 
-
     @Override
     public void close() throws Exception {
-        localDataSource.close();
-        remoteDataSource.close();
+        try {
+            localDataSource.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            remoteDataSource.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
