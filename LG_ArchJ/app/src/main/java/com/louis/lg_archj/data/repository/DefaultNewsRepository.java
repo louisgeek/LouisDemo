@@ -13,7 +13,6 @@ import com.louis.lg_archj.domain.model.News;
 import com.louis.lg_archj.domain.repository.NewsRepository;
 import com.louis.lg_archj.data.remote.NewsRemoteDataSource;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import java.util.stream.Collectors;
@@ -88,7 +87,7 @@ public class DefaultNewsRepository implements NewsRepository {
 
                     Log.d(TAG, "网络数据获取成功，数据量: " + newsList.size());
                     //存到内存缓存
-                    memoryCache.put(CACHE_KEY, new ArrayList<>(newsList), CACHE_EXPIRE_TIME);
+                    memoryCache.put(CACHE_KEY, newsList, CACHE_EXPIRE_TIME);
                     mutableLiveData.postValue(new Result.Success<>(newsList));
 
                 })

@@ -14,3 +14,6 @@
 - 不应该包含与 UI 或平台无关的代码（如网络请求、数据库操作、数据转换等）
 - 最好不要沦为只是一个 Repository 的包装器
   纯业务逻辑，不关心数据来源（本地/远程） Repository 接口需要写在 domain 层，对应实现写在 data 层
+  domain 中的 mode 业务模型，可以融合多个数据源对应的字段、剔除敏感字段、加业务计算属性 selected
+  属性，不要依赖 Android API, domain 不该知道数据库表或 json 字段，把转换逻辑留在 data 层，domain
+  永远只接受/吐出纯业务 model
