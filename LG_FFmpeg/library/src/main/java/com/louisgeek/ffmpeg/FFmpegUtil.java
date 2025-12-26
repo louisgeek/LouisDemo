@@ -10,10 +10,10 @@ public class FFmpegUtil {
     public static native String getFFmpegVersion();
 
     /**
-     * 将TS文件转换为MP4格式
-     * @param inputPath TS文件路径
-     * @param outputPath MP4输出路径
-     * @return 0成功，-1失败
+     * TS 转 MP4
+     * @param inputPath  输入的 TS 文件路径 (例如: /sdcard/input.ts)
+     * @param outputPath 输出的 MP4 文件路径 (例如: /sdcard/output.mp4)
+     * @return 0 成功, 非 0 失败
      */
     public static native int convertTsToMp4(String inputPath, String outputPath);
 
