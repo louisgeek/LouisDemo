@@ -68,12 +68,12 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 # 链接库
 target_link_libraries(${CMAKE_PROJECT_NAME}
         # List libraries link to the target library
-        avcodec
-        avdevice
-        avfilter
-        avformat
-        avutil
-        swresample
-        swscale
+        avcodec # 编解码（H.264/H.265/AAC 等）
+#        avdevice # 设备访问（如摄像头、麦克风等）
+#        avfilter # 音视频滤镜/效果
+        avformat # 格式封装/解封装（MP4/TS/FLV/RTMP 等）
+        avutil # 工具函数库（内存、日志、时间戳等）
+#        swresample # 音频重采样（采样率、通道数等）
+#        swscale # 图像/视频缩放（YUV<->RGB 像素格式转换、缩放、裁剪等）
         android
         log)
