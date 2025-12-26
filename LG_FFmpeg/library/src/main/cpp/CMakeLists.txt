@@ -73,7 +73,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 #        avfilter # 音视频滤镜/效果
         avformat # 格式封装/解封装（MP4/TS/FLV/RTMP 等）
         avutil # 工具函数库（内存、日志、时间戳等）
-#        swresample # 音频重采样（采样率、通道数等）
+        swresample # 音频重采样（采样率、通道数等）
 #        swscale # 图像/视频缩放（YUV<->RGB 像素格式转换、缩放、裁剪等）
         android
         log)
