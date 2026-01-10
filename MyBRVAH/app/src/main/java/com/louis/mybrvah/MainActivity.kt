@@ -34,14 +34,11 @@ class MainActivity : AppCompatActivity() {
         myBaseAdapter.stateView = stateView
 
 //        myBaseAdapter.animationEnable = true
-        myBaseAdapter.isStateViewEnable = true
+        myBaseAdapter.isStateViewEnable = true //使用状态布局
 
         myBaseAdapter.setOnItemClickListener { adapter, view, position ->
-            Toast.makeText(
-                this,
-                "position=$position dat=" + adapter.getItem(position),
-                Toast.LENGTH_SHORT
-            ).show()
+            val data = adapter.getItem(position)
+            Toast.makeText(this, "position=$position data=$data", Toast.LENGTH_SHORT).show()
         }
         val rv01: RecyclerView = findViewById(R.id.rv01)
         rv01.layoutManager = LinearLayoutManager(this)
@@ -53,7 +50,6 @@ class MainActivity : AppCompatActivity() {
             itemList.add("test_" + (i + 1))
         }
         myBaseAdapter.submitList(itemList)
-
 
 
         val tvTest :TextView =  findViewById(R.id.tvTest)
