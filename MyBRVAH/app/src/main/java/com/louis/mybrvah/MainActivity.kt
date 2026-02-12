@@ -1,5 +1,6 @@
 package com.louis.mybrvah
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -11,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.core.graphics.toColorInt
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,14 +25,11 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-
-
-
-
         val myBaseAdapter = MyBaseAdapter()
 //        myBaseAdapter.setStateViewLayout(this, R.layout.list_item_01)
         val stateView =  LayoutInflater.from(this).inflate(R.layout.list_item_01, FrameLayout(this), false)
         stateView.findViewById<TextView>(R.id.tv01).text = "空列表"
+        stateView.setBackgroundColor(Color.YELLOW)
         myBaseAdapter.stateView = stateView
 
 //        myBaseAdapter.animationEnable = true
