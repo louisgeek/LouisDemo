@@ -2,8 +2,8 @@ package com.louis.javadesignpatterns.creational.singleton;
 
 /**
  * Created by louisgeek on 2024/12/12.
+ * 2.1 懒汉式 线程不安全
  */
-//2.1 懒汉式 线程不安全
 @Deprecated
 public class Singleton21 {
     private static Singleton21 sInstance;
