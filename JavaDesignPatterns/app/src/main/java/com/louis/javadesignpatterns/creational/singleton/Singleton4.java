@@ -2,8 +2,10 @@ package com.louis.javadesignpatterns.creational.singleton;
 
 /**
  * Created by louisgeek on 2024/12/12.
+ * 4 静态内部类
+ * 最推荐的单例实现方式
+ * 懒加载
  */
-//4 静态内部类
 public class Singleton4 {
     private Singleton4() {
     }
@@ -15,6 +17,7 @@ public class Singleton4 {
     }
 
     public static Singleton4 getInstance() {
+        //当调用 getInstance 方法时，才会触发 SingletonInstanceHolder 类的加载
         return SingletonInstanceHolder.INSTANCE;
     }
 
