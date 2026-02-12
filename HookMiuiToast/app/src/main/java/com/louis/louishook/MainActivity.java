@@ -28,14 +28,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 //
-        Toast.makeText(getApplicationContext(), "第一次提示", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(), "第一次提示", Toast.LENGTH_SHORT).show();
+        String app_name = "LouisHook";
+        Toast.makeText(getApplicationContext(), app_name+"第一次提示", Toast.LENGTH_SHORT).show();
 
         try {
             //目的是为了 Hook Toast#sService，只需要处理一次
             //如果直接 Hook Toast#mNextView，需要针对每个 Toast 的实例都处理一次，太麻烦了，直接 Hook Toast#mTN 也是同样问题
             //先调用一次 Toast#getService 让静态变量 Toast#sService 先初始化
             //从 Toast 反射获取静态变量 sService
-            Method getServiceMethod = Toast.class.getDeclaredMethod("getService", null);
+//            Method getServiceMethod = Toast.class.getDeclaredMethod("getService", null);
+            Method getServiceMethod = Toast.class.getDeclaredMethod("getService");
             getServiceMethod.setAccessible(true);
             //invoke 执行 getService 有返回 INotificationManager
             Object service = getServiceMethod.invoke(null);
@@ -114,7 +117,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         //
-        Toast.makeText(getApplicationContext(), "第二次提示", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(), "第二次提示", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), app_name+"第二次提示", Toast.LENGTH_SHORT).show();
 
 
 

@@ -5,7 +5,7 @@ plugins {
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
-
+    namespace 'com.louis.louishook'
     defaultConfig {
         applicationId "com.louis.louishook"
         minSdkVersion 21
