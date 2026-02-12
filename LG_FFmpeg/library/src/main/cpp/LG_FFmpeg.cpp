@@ -22,6 +22,7 @@ Java_com_louisgeek_ffmpeg_FFmpegUtil_getFFmpegVersion(JNIEnv *env, jclass clazz)
     return env->NewStringUTF(av_version_info());
 }
 
+//api 形式而不是 cmd 形式
 extern "C" JNIEXPORT jint JNICALL
 Java_com_louisgeek_ffmpeg_FFmpegUtil_convertTsToMp4(JNIEnv *env, jclass thiz,
                                                     jstring inputPath, jstring outputPath) {
