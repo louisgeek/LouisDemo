@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 主内容区域 -->
+    <FrameLayout
+        android:id="@+id/map_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#2196F3">
+
+        <Button
+            android:id="@+id/btn_show_point"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="点击显示点位信息"
+            android:padding="16dp"/>
+    </FrameLayout>
+
+    <!-- 可拖动底部面板  Bottom Sheet 使用 BottomSheetBehavior 实现拖动效果 -->
+    <LinearLayout
+        android:id="@+id/bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:elevation="8dp"
+        android:background="@drawable/bottom_sheet_background"
+        app:layout_behavior="@string/bottom_sheet_behavior"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="120dp">
+
+        <!-- 面板内容区域 -->
+
+        <!-- 拖拽手柄 -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/drag_handle_background" />
+
+        <!-- 关闭按钮 -->
+        <ImageView
+            android:id="@+id/btn_close"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="end"
+            android:layout_margin="8dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:visibility="visible"/>
+
+        <!-- 标题栏（默认隐藏） -->
+        <LinearLayout
+            android:id="@+id/title_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_arrow_back"
+                android:contentDescription="返回"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="详情页面"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:layout_marginStart="16dp"/>
+        </LinearLayout>
+
+        <!-- 可滚动内容区域 -->
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="点位信息"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="这里显示详细的点位信息内容...\n可以滚动查看更多内容。\n\n支持拖拽手势：\n• 向上拖拽到顶部全屏显示\n• 向下拖拽到底部关闭\n• 支持在中间位置停留（可选）"
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="4dp"/>
+
+                <!-- 模拟更多内容 -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="800dp"
+                    android:background="#F5F5F5"
+                    android:layout_marginTop="16dp"/>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
