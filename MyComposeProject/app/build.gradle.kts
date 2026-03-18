@@ -6,9 +6,7 @@ plugins {
 
 android {
     namespace = "com.louis.mycomposeproject"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.louis.mycomposeproject"

@@ -6,6 +6,7 @@ import com.louis.mycomposeproject.data.remote.LoginRequest
 import com.louis.mycomposeproject.data.remote.RegisterRequest
 import com.louis.mycomposeproject.domain.model.User
 import com.louis.mycomposeproject.domain.repository.AuthRepository
+import com.louis.mycomposeproject.util.NetworkErrorHandler
 
 class AuthRepositoryImpl(
     private val api: AuthApi,
@@ -20,7 +21,7 @@ class AuthRepositoryImpl(
             preferencesManager.saveEmail(user.email)
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(NetworkErrorHandler.getErrorMessage(e)))
         }
     }
     
@@ -30,7 +31,7 @@ class AuthRepositoryImpl(
             val user = User(response.id, response.email, response.token)
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(NetworkErrorHandler.getErrorMessage(e)))
         }
     }
     

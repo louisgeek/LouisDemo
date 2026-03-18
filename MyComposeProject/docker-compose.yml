@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  android-build:
+    build: .
+    container_name: mycomposeproject-build
+    volumes:
+      - .:/app
+      - gradle-cache:/root/.gradle
+    environment:
+      - ANDROID_SDK_ROOT=/opt/android-sdk
+
+volumes:
+  gradle-cache:
