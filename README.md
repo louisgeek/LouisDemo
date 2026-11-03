@@ -1,6 +1,4 @@
-# 
-
-## Android（Kotlin / Java）
+# LouisDemo
 
 | 项目 | 功能 |
 | --- | --- |
@@ -12,9 +10,9 @@
 | MyBottomSheetDialog | BottomSheetDialogFragment 列表选择 Demo |
 | MyFFmpeg | FFmpeg 6.1 本地媒体 remux 库（library 模块 + demo），TS/M3U8 转 MP4 |
 | MyFFmpegKit | 基于 ffmpeg-kit 的视频下载 Demo（DownloadTask/VideoDownloader；ffmpeg-kit 已停维护，依赖被注释） |
-| MyFlow | Kotlin Flow + ViewModel 用法 Demo |
+| MyFlow | callbackFlow 用法 Demo：TextWatcher / GPS 定位 / 网络状态回调转 Flow（awaitClose 注销） |
 | MyGson | Gson 序列化（Java/Kotlin 对比、构造器可见性等边界情况） |
-| MyJni | NDK/JNI 模板工程（CMake + stringFromJNI 默认模板，验证 JNI 构建链路） |
+| MyJni2 | NDK/JNI：C++ 解析摄像头录像索引（V20 索引头 + 告警位域），模拟数据演示 |
 | MyLogs | 自定义 LogTool 日志工具 Demo |
 | MyMap | 地图抽象层：IMap 接口 + 高德/GoogleMap 实现（工厂模式）+ 自定义 Marker View |
 | MyMedia3Exo | Media3/ExoPlayer 播放封装 + M3U8 下载管理（DownloadService/Manager）、自定义日志 HttpDataSource |
@@ -25,7 +23,7 @@
 | MyOkHttp | OkHttp 网络请求 Demo |
 | MyPlayer | 播放器封装：IPlayer 接口 + ExoPlayerImpl 实现 |
 | MyPopupMenu | PopupMenu 用法 Demo |
-| MyStateFlow | StateFlow + ViewModel 状态管理 Demo（NewsUiState） |
+| MyStateFlow | StateFlow 状态管理 Demo（NewsViewModel + NewsUiState，单一 UiState + update 更新） |
 | MyStatusBar | Edge-to-edge 沉浸式状态栏（EdgeToEdgeHelper） |
 | MyCustomView | 自定义 View 合集：圆形进度条、带清除按钮 EditText、圆角 ImageView、画板、自定义 ViewGroup 等 |
 | MyWebView | WebView 封装（DialogFragment 承载 + JS 交互扩展） |
