@@ -72,8 +72,9 @@ public class AMapImpl implements IMap {
     @Override
     public void addMarker(MapMarker mapMarker) {
         if (aMap != null) {
+            LatLng position = new LatLng(mapMarker.getLatitude(), mapMarker.getLongitude());
             MarkerOptions options = new MarkerOptions()
-                    .position(new LatLng(mapMarker.getLatitude(), mapMarker.getLongitude()))
+                    .position(position)
                     .title(mapMarker.getTitle())
                     .snippet(mapMarker.getSnippet())
                     .draggable(true);
@@ -90,7 +91,8 @@ public class AMapImpl implements IMap {
     @Override
     public void moveCamera(double latitude, double longitude, float zoom) {
         if (aMap != null) {
-            aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
+            LatLng position = new LatLng(latitude, longitude);
+            aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, zoom));
         }
     }
 

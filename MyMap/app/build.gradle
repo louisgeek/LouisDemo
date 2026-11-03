@@ -1,0 +1,50 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.louis.mymap'
+    compileSdk {
+        version = release(36)
+    }
+
+    defaultConfig {
+        applicationId "com.louis.mymap"
+        minSdk 23
+        targetSdk 23
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.activity
+    implementation libs.constraintlayout
+
+    implementation 'com.amap.api:3dmap:9.8.3'// 3D地图
+//    implementation 'com.amap.api:location:6.5.1' // 定位功能
+//   implementation 'com.amap.api:search:9.8.3'  // 搜索功能
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+}

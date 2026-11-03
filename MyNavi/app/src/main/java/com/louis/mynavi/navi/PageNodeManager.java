@@ -264,17 +264,36 @@ public class PageNodeManager {
 
     public PageNode getStartNode() {
         List<PageNode> sortedNodes = topologicalSort();
-        System.out.println("getStartNode: Sorted nodes count: " + sortedNodes.size());
         
+        // 优先找依赖最近完成节点的未完成节点
+        String lastCompletedTag = PageNavigator.getInstance().getLastCompletedFragmentTag();
+        if (lastCompletedTag != null) {
+            PageNode foundNode = null;
+            for (PageNode node : sortedNodes) {
+                if (!node.isCompleted()) {
+                    for (PageNode dep : node.dependencies) {
+                        if (dep.fragmentTag.equals(lastCompletedTag)) {
+                            foundNode = node;
+                            break;
+                        }
+                    }
+                    if (foundNode != null) break;
+                }
+            }
+            if (foundNode != null) {
+                return foundNode;
+            }
+            // 如果没有找到直接后继，且最近完成的不是根节点，则返回null
+            PageNode lastCompletedNode = getPageNode(lastCompletedTag);
+            if (lastCompletedNode != null && !lastCompletedNode.dependencies.isEmpty()) {
+                return null;
+            }
+        }
+        
+        // 否则返回第一个未完成的
         for (PageNode node : sortedNodes) {
             if (!node.isCompleted()) {
                 return node;
-            }
-            //带测试
-            for (PageNode dependency : node.dependencies) {
-                if (!dependency.isCompleted()) {
-                    return dependency;
-                }
             }
         }
         return sortedNodes.isEmpty() ? null : sortedNodes.get(sortedNodes.size() - 1);

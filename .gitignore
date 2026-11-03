@@ -1,15 +1,27 @@
+# ---- IDE ----
+.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+.vscode/
+
+# ---- Android / Gradle ----
+.gradle/
+build/
+.kotlin/
+.cxx/
+.externalNativeBuild/
+captures/
 local.properties
+*.apk
+*.aab
+*.hprof
+
+# ---- Flutter / Dart ----
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db

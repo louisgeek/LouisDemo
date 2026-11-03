@@ -75,12 +75,17 @@ public class PageNavigator {
         } else {
             // 使用起始节点
             node = mPageNodeManager.getStartNode();
+            if (node == null) {
+                Log.e(TAG, "No more nodes to navigate to");
+                return;
+            }
         }
 
         Fragment targetFragment = null;
         try {
             targetFragment = node.fragmentClass.newInstance();
             Log.e(TAG, "navigateToNext: Target fragment=" + targetFragment);
+
 
             // 执行跳转
             mNavManager.navigateTo(R.id.containerId, targetFragment, null, true);
@@ -89,6 +94,7 @@ public class PageNavigator {
             Log.e(TAG, "Fragment instantiation failed", e);
         }
     }
+
 
     public void navigateToNext2() {
 //        List<PageNode> order = mPageNodeManager.topologicalSortOne();
@@ -269,13 +275,17 @@ public class PageNavigator {
     }
 
     private Set<String> completedNodes = new HashSet<>();
+    private String lastCompletedFragmentTag;
 
     // 标记页面为已访问
     public void markNodeCompleted(Class<? extends Fragment> fragmentClass) {
-//        if (pageNodeMap.containsKey(fragmentTag)) {
         String fragmentTag = fragmentClass.getSimpleName();
         completedNodes.add(fragmentTag);
-//        }
+        lastCompletedFragmentTag = fragmentTag;
+    }
+
+    public String getLastCompletedFragmentTag() {
+        return lastCompletedFragmentTag;
     }
 
     public boolean isCompleted(Class<? extends Fragment> fragmentClass) {

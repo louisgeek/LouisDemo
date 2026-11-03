@@ -1,0 +1,17 @@
+MyFFmpeg 第三方组件声明
+========================
+
+FFmpeg 6.1.4
+------------
+本库以动态链接方式使用预编译 FFmpeg 共享库：
+libavformat / libavcodec / libavutil / libswresample。
+（avdevice / avfilter / swscale 不参与链接，也不会被打包。）
+
+FFmpeg 默认以 GNU Lesser General Public License v2.1 or later（LGPL-2.1+）发布；
+若所用构建开启了 --enable-gpl 或包含 GPL 组件，则整体受 GNU GPL 约束。
+许可证说明见 https://ffmpeg.org/legal.html。
+
+分发要求：
+- 保持 .so 为独立共享库（动态链接），不要静态链接进应用；
+- 随应用附带对应许可证文本与源码获取方式；
+- 发布前核实实际使用的 FFmpeg 构建配置（是否包含 GPL 组件）。

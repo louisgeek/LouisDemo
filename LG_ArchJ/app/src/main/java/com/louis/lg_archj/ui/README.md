@@ -1,5 +1,0 @@
-# 
-
-NewsUiState
-
-NewsUiIntent

@@ -79,7 +79,9 @@ public class SettingFragment extends Fragment {
 
         //
         binding.btnNext.setOnClickListener(v -> {
-            PageNavigator.getInstance().markNodeCompleted(SettingFragment.class);
+//            if (!PageNavigator.getInstance().isCompleted(SettingFragment.class)) {
+                PageNavigator.getInstance().markNodeCompleted(SettingFragment.class);
+//            }
             PageNavigator.getInstance().navigateToNext(false);
         });
     }
